@@ -1,0 +1,13 @@
+name: 'Checking for updates for plugins'
+description: 'checking for new versions'
+inputs:
+  working-directory:  # id of input
+    description: 'Where to run command'
+    required: true
+    default: './'
+outputs:
+  pluginVersionsForPrint: # id of output
+    description: 'String with plugins versions for printing'
+runs:
+  using: 'node12'
+  main: 'index.js'

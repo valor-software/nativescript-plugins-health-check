@@ -3,9 +3,8 @@ hooks/
 node_modules/
 platforms/
 
-package-lock.json
-
 # NativeScript Template
+*.js
 *.js.map
 !ngcc.config.js
 !webpack.config.js

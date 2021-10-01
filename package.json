@@ -1,48 +1,31 @@
 {
-  "name": "@nativescript/template-hello-world-ng",
-  "main": "main.js",
-  "version": "7.0.9",
-  "author": "NativeScript Team <oss@nativescript.org>",
-  "description": "NativeScript Application",
-  "license": "SEE LICENSE IN <your-license-filename>",
-  "publishConfig": {
-    "access": "public"
+  "name": "nativescript-plugins-test",
+  "version": "1.0.0",
+  "description": "testing of nativescript plugins ",
+  "main": ".github/actions/check-for-plugin-updates-action/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexanderSinitsa/NativeScript-plugins-test.git"
   },
   "keywords": [
     "nativescript",
-    "mobile",
-    "angular",
     "{N}",
-    "template"
+    "plugins",
+    "angular",
+    "test"
   ],
-  "repository": "<fill-your-repository-here>",
+  "author": "Alexander Sinitsa",
+  "license": "ISC",
   "bugs": {
-    "url": "https://github.com/NativeScript/NativeScript/issues"
+    "url": "https://github.com/AlexanderSinitsa/NativeScript-plugins-test/issues"
   },
-  "dependencies": {
-    "@angular/animations": "~11.0.0",
-    "@angular/common": "~11.0.0",
-    "@angular/compiler": "~11.0.0",
-    "@angular/core": "~11.0.0",
-    "@angular/forms": "~11.0.0",
-    "@angular/platform-browser": "~11.0.0",
-    "@angular/platform-browser-dynamic": "~11.0.0",
-    "@angular/router": "~11.0.0",
-    "@nativescript/angular": "~11.0.0",
-    "@nativescript/core": "~7.1.0",
-    "@nativescript/theme": "~3.0.0",
-    "reflect-metadata": "~0.1.12",
-    "rxjs": "^6.6.0",
-    "zone.js": "~0.11.1"
-  },
+  "homepage": "https://github.com/AlexanderSinitsa/NativeScript-plugins-test#readme",
   "devDependencies": {
-    "@angular/compiler-cli": "~11.0.0",
-    "@nativescript/android": "7.0.1",
-    "@nativescript/types": "~7.0.0",
-    "@nativescript/webpack": "~4.0.0",
-    "@ngtools/webpack": "~11.0.0",
-    "typescript": "~4.0.0"
-  },
-  "private": "true",
-  "readme": "NativeScript Application"
+    "@actions/core": "^1.6.0",
+    "@actions/exec": "^1.1.0",
+    "typescript": "^4.4.3"
+  }
 }
