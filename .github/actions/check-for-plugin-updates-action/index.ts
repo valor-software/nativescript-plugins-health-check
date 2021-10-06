@@ -10,91 +10,118 @@ interface PluginVersion {
   latest?: string;
 }
 
+interface TestResultItem {
+  version?: string;
+  [key: string]: string // { directory: test_result (+/-)
+}
+
 
 class CheckForPluginUpdatesAction {
   FILE_NAME_FOR_REPORT = 'PLUGINS_COMPATIBILITY.md';
-  delimiter = '\|';
+  delimiter = ', ';
   options: ExecOptions = {};
   myError = '';
-  pluginVersionsForPrint = '';
+  testResult: { [key: string]: TestResultItem } = {};
   pluginsVersions: { [key: number]: PluginVersion } = {};
+  workingDirectories: string[] = [];
+  needAddPluginsNames = false;
 
 
   async start() {
     let foundedNewVersion = false;
 
     try {
-      const workingDirectory = core.getInput('working-directory');
-      console.log(`Current working directory is ${workingDirectory}!`);
+      this.needAddPluginsNames = !!core.getInput('add-plugins-names');
+      this.workingDirectories = core.getInput('working-directories').replace(/\s/g, '').split(',');
+      console.log('workingDirectories ====>', this.workingDirectories);
+      if (!this.workingDirectories || !this.workingDirectories.length) {
+        core.setFailed('No projects to test!');
+        return;
+      }
 
-      this.options.cwd = workingDirectory || './';
-
-      for (let i = 0; i < pluginsList.length; i++) {
-        const pluginName = pluginsList[i];
-        console.log('pluginName ! ====>', pluginName);
-        this.pluginsVersions[i] = {};
-
-
-        this.options.listeners = {
-          stdout: (data) => {
-            const myOutput = data.toString().trim();
-            // const match = myOutput.match(/[0-9.]+$/g) || [];
-            const match = myOutput.match(/[0-9.]+/g) || [];
-            this.pluginsVersions[i].tested = match[0];
-          },
-          stderr: (data) => {
-            this.myError += '=grep tested=' + data.toString();
-          }
-        };
-        // await exec.exec('npm list ' + pluginName + ' --depth=0', [], options);
-        // todo: move ignoreReturnCode to options
-        await exec.exec(`grep ${pluginName} ${this.FILE_NAME_FOR_REPORT}`, [], {
-          ...this.options,
-          ignoreReturnCode: true
-        });
-
-
-        this.options.listeners = {
-          stdout: (data) => {
-            const myOutput = data.toString().trim();
-            const match = myOutput.match(/[0-9.]+$/g) || [];
-            this.pluginsVersions[i].latest = match[0];
-          },
-          stderr: (data) => {
-            this.myError += '=npm info=' + data.toString();
-          }
-        };
-
-        await exec.exec(`npm info ${pluginName} version`, [], this.options);
-
-        const testedVersion = this.pluginsVersions[i]?.tested;
-        console.log('testedVersion ====>', testedVersion);
-        const latestVersion = this.pluginsVersions[i]?.latest;
-        console.log('latestVersion ====>', latestVersion);
-
-        if (!latestVersion) {
-          core.setFailed('Failed to get a plugin version for ' + pluginName + ' ! Check plugin name, please.');
-          // todo: write to a log file
+      for await (const workingDirectory of this.workingDirectories) {
+        if (!workingDirectory) {
           return;
         }
 
-        if (testedVersion !== latestVersion) {
-          foundedNewVersion = true
+        console.log(`Current working directory is ${workingDirectory}!`);
+
+        this.options.cwd = './' + workingDirectory;
+
+        for (let i = 0; i < pluginsList.length; i++) {
+          const pluginName = pluginsList[i];
+          console.log('pluginName ! ====>', pluginName);
+          this.pluginsVersions[i] = {};
+
+
+          this.options.listeners = {
+            stdout: (data) => {
+              const myOutput = data.toString().trim();
+              // const match = myOutput.match(/[0-9.]+$/g) || [];
+              const match = myOutput.match(/[0-9.]+/g) || [];
+              this.pluginsVersions[i].tested = match[0];
+            },
+            stderr: (data) => {
+              this.myError += '=grep tested=' + data.toString();
+            }
+          };
+          // await exec.exec('npm list ' + pluginName + ' --depth=0', [], options);
+          // todo: move ignoreReturnCode to options
+          await exec.exec(`grep ${pluginName} ${this.FILE_NAME_FOR_REPORT}`, [], {
+            ...this.options,
+            ignoreReturnCode: true
+          });
+
+
+          this.options.listeners = {
+            stdout: (data) => {
+              const myOutput = data.toString().trim();
+              const match = myOutput.match(/[0-9.]+$/g) || [];
+              this.pluginsVersions[i].latest = match[0];
+            },
+            stderr: (data) => {
+              this.myError += '=npm info=' + data.toString();
+            }
+          };
+
+          await exec.exec(`npm info ${pluginName} version`, [], this.options);
+
+          const testedVersion = this.pluginsVersions[i]?.tested;
+          console.log('testedVersion ====>', testedVersion);
+          const latestVersion = this.pluginsVersions[i]?.latest;
+          console.log('latestVersion ====>', latestVersion);
+
+          if (!latestVersion) {
+            core.setFailed('Failed to get a plugin version for ' + pluginName + ' ! Check plugin name, please.');
+            // todo: write to a log file
+            return;
+          }
+
+          if (testedVersion !== latestVersion) {
+            foundedNewVersion = true
+          }
+        }
+
+        if (foundedNewVersion) {
+          // this.pluginsTestResult += workingDirectories + ';';
+          await this.updatePlugins(workingDirectory);
+        } else {
+          console.log(`No updates for plugins!`);
         }
       }
 
-      if (foundedNewVersion) {
-        await this.updatePlugins();
-      } else {
-        console.log(`No updates for plugins!`);
-      }
+      this.setOutput();
+      // Get the JSON webhook payload for the event that triggered the workflow
+      // const payload = JSON.stringify(github.context.payload, undefined, 2)
+      // console.log(`The event payload: ${payload}`);
 
     } catch (error) {
       core.setFailed(error.message);
     }
   }
 
-  async updatePlugins() {
+
+  async updatePlugins(workingDirectory: string) {
     for (let i = 0; i < pluginsList.length; i++) {
       const testedVersion = this.pluginsVersions[i].tested;
       const latestVersion = this.pluginsVersions[i].latest;
@@ -106,21 +133,18 @@ class CheckForPluginUpdatesAction {
         // await this.uninstallPlugin(this.pluginsVersions[i]);
       }
 
-      this.pluginVersionsForPrint += i + 1 + this.delimiter + pluginsList[i] + this.delimiter + latestVersion
-        + this.delimiter + (isSuccess ? '+\n' : '-\n');
+      if (!this.testResult[pluginsList[i]]) {
+        this.testResult[pluginsList[i]] = {};
+      }
 
-      console.log('pluginVersionsForPrint ====>', this.pluginVersionsForPrint);
+      this.testResult[pluginsList[i]].version = latestVersion;
+      this.testResult[pluginsList[i]][workingDirectory] = isSuccess ? '+' : '-';
     }
-
-    core.setOutput("pluginVersionsForPrint", this.pluginVersionsForPrint);
-    // Get the JSON webhook payload for the event that triggered the workflow
-    // const payload = JSON.stringify(github.context.payload, undefined, 2)
-    // console.log(`The event payload: ${payload}`);
   }
 
 
   async testPlugin(pluginName, version) {
-    console.log('test the Plugin pluginName ====>');
+    console.log('test the Plugin pluginName ====> ', pluginName);
     let isSuccess = false;
     try {
       this.options.listeners = {
@@ -146,7 +170,8 @@ class CheckForPluginUpdatesAction {
           isSuccess = false
         }
       };
-      await exec.exec('tns FAILED-build android', [], this.options);
+      // core.setFailed('BUILD FILED  ---- < ----');
+      // await exec.exec('tns FAILED-build android', [], this.options);
 
       return isSuccess;
 
@@ -169,6 +194,21 @@ class CheckForPluginUpdatesAction {
     };
 
     await exec.exec('npm uninstall ' + pluginName, [], this.options);
+  }
+
+  setOutput() {
+    let output = '';
+
+    for (const pluginName of pluginsList) {
+      output += this.needAddPluginsNames ? pluginName + this.delimiter + this.testResult[pluginName].version : '';
+
+      for (const workingDirectory of this.workingDirectories) {
+        output += this.delimiter + this.testResult[pluginName][workingDirectory];
+      }
+      output += ';';
+    }
+
+    core.setOutput('pluginsTestResult', output);
   }
 }
 

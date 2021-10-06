@@ -46,6 +46,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 exports.__esModule = true;
 var core = require("@actions/core");
 var exec = require("@actions/exec");
@@ -53,31 +60,52 @@ var plugins_list_1 = require("../../workflows/plugins-list");
 var CheckForPluginUpdatesAction = /** @class */ (function () {
     function CheckForPluginUpdatesAction() {
         this.FILE_NAME_FOR_REPORT = 'PLUGINS_COMPATIBILITY.md';
-        this.delimiter = '\|';
+        this.delimiter = ', ';
         this.options = {};
         this.myError = '';
-        this.pluginVersionsForPrint = '';
+        this.testResult = {};
         this.pluginsVersions = {};
+        this.workingDirectories = [];
+        this.needAddPluginsNames = false;
     }
     CheckForPluginUpdatesAction.prototype.start = function () {
-        var _a, _b;
+        var e_1, _a;
+        var _b, _c;
         return __awaiter(this, void 0, void 0, function () {
-            var foundedNewVersion, workingDirectory, _loop_1, this_1, i, state_1, error_1;
+            var foundedNewVersion, _d, _e, workingDirectory, _loop_1, this_1, i, state_1, e_1_1, error_1;
             var _this = this;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            return __generator(this, function (_f) {
+                switch (_f.label) {
                     case 0:
                         foundedNewVersion = false;
-                        _c.label = 1;
+                        _f.label = 1;
                     case 1:
-                        _c.trys.push([1, 9, , 10]);
-                        workingDirectory = core.getInput('working-directory');
+                        _f.trys.push([1, 20, , 21]);
+                        this.needAddPluginsNames = !!core.getInput('add-plugins-names');
+                        this.workingDirectories = core.getInput('working-directories').replace(/\s/g, '').split(',');
+                        console.log('workingDirectories ====>', this.workingDirectories);
+                        if (!this.workingDirectories || !this.workingDirectories.length) {
+                            core.setFailed('No projects to test!');
+                            return [2 /*return*/];
+                        }
+                        _f.label = 2;
+                    case 2:
+                        _f.trys.push([2, 13, 14, 19]);
+                        _d = __asyncValues(this.workingDirectories);
+                        _f.label = 3;
+                    case 3: return [4 /*yield*/, _d.next()];
+                    case 4:
+                        if (!(_e = _f.sent(), !_e.done)) return [3 /*break*/, 12];
+                        workingDirectory = _e.value;
+                        if (!workingDirectory) {
+                            return [2 /*return*/];
+                        }
                         console.log("Current working directory is " + workingDirectory + "!");
-                        this.options.cwd = workingDirectory || './';
+                        this.options.cwd = './' + workingDirectory;
                         _loop_1 = function (i) {
                             var pluginName, testedVersion, latestVersion;
-                            return __generator(this, function (_d) {
-                                switch (_d.label) {
+                            return __generator(this, function (_g) {
+                                switch (_g.label) {
                                     case 0:
                                         pluginName = plugins_list_1.pluginsList[i];
                                         console.log('pluginName ! ====>', pluginName);
@@ -99,7 +127,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                                     case 1:
                                         // await exec.exec('npm list ' + pluginName + ' --depth=0', [], options);
                                         // todo: move ignoreReturnCode to options
-                                        _d.sent();
+                                        _g.sent();
                                         this_1.options.listeners = {
                                             stdout: function (data) {
                                                 var myOutput = data.toString().trim();
@@ -112,10 +140,10 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                                         };
                                         return [4 /*yield*/, exec.exec("npm info " + pluginName + " version", [], this_1.options)];
                                     case 2:
-                                        _d.sent();
-                                        testedVersion = (_a = this_1.pluginsVersions[i]) === null || _a === void 0 ? void 0 : _a.tested;
+                                        _g.sent();
+                                        testedVersion = (_b = this_1.pluginsVersions[i]) === null || _b === void 0 ? void 0 : _b.tested;
                                         console.log('testedVersion ====>', testedVersion);
-                                        latestVersion = (_b = this_1.pluginsVersions[i]) === null || _b === void 0 ? void 0 : _b.latest;
+                                        latestVersion = (_c = this_1.pluginsVersions[i]) === null || _c === void 0 ? void 0 : _c.latest;
                                         console.log('latestVersion ====>', latestVersion);
                                         if (!latestVersion) {
                                             core.setFailed('Failed to get a plugin version for ' + pluginName + ' ! Check plugin name, please.');
@@ -130,38 +158,60 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                         };
                         this_1 = this;
                         i = 0;
-                        _c.label = 2;
-                    case 2:
-                        if (!(i < plugins_list_1.pluginsList.length)) return [3 /*break*/, 5];
+                        _f.label = 5;
+                    case 5:
+                        if (!(i < plugins_list_1.pluginsList.length)) return [3 /*break*/, 8];
                         return [5 /*yield**/, _loop_1(i)];
-                    case 3:
-                        state_1 = _c.sent();
+                    case 6:
+                        state_1 = _f.sent();
                         if (typeof state_1 === "object")
                             return [2 /*return*/, state_1.value];
-                        _c.label = 4;
-                    case 4:
-                        i++;
-                        return [3 /*break*/, 2];
-                    case 5:
-                        if (!foundedNewVersion) return [3 /*break*/, 7];
-                        return [4 /*yield*/, this.updatePlugins()];
-                    case 6:
-                        _c.sent();
-                        return [3 /*break*/, 8];
+                        _f.label = 7;
                     case 7:
-                        console.log("No updates for plugins!");
-                        _c.label = 8;
-                    case 8: return [3 /*break*/, 10];
+                        i++;
+                        return [3 /*break*/, 5];
+                    case 8:
+                        if (!foundedNewVersion) return [3 /*break*/, 10];
+                        // this.pluginsTestResult += workingDirectories + ';';
+                        return [4 /*yield*/, this.updatePlugins(workingDirectory)];
                     case 9:
-                        error_1 = _c.sent();
+                        // this.pluginsTestResult += workingDirectories + ';';
+                        _f.sent();
+                        return [3 /*break*/, 11];
+                    case 10:
+                        console.log("No updates for plugins!");
+                        _f.label = 11;
+                    case 11: return [3 /*break*/, 3];
+                    case 12: return [3 /*break*/, 19];
+                    case 13:
+                        e_1_1 = _f.sent();
+                        e_1 = { error: e_1_1 };
+                        return [3 /*break*/, 19];
+                    case 14:
+                        _f.trys.push([14, , 17, 18]);
+                        if (!(_e && !_e.done && (_a = _d["return"]))) return [3 /*break*/, 16];
+                        return [4 /*yield*/, _a.call(_d)];
+                    case 15:
+                        _f.sent();
+                        _f.label = 16;
+                    case 16: return [3 /*break*/, 18];
+                    case 17:
+                        if (e_1) throw e_1.error;
+                        return [7 /*endfinally*/];
+                    case 18: return [7 /*endfinally*/];
+                    case 19:
+                        this.setOutput();
+                        return [3 /*break*/, 21];
+                    case 20:
+                        error_1 = _f.sent();
                         core.setFailed(error_1.message);
-                        return [3 /*break*/, 10];
-                    case 10: return [2 /*return*/];
+                        return [3 /*break*/, 21];
+                    case 21: return [2 /*return*/];
                 }
             });
         });
     };
-    CheckForPluginUpdatesAction.prototype.updatePlugins = function () {
+    CheckForPluginUpdatesAction.prototype.updatePlugins = function (workingDirectory) {
         return __awaiter(this, void 0, void 0, function () {
             var i, testedVersion, latestVersion, isSuccess;
             return __generator(this, function (_a) {
@@ -181,16 +231,16 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                         isSuccess = _a.sent();
                         _a.label = 3;
                     case 3:
-                        this.pluginVersionsForPrint += i + 1 + this.delimiter + plugins_list_1.pluginsList[i] + this.delimiter + latestVersion
-                            + this.delimiter + (isSuccess ? '+\n' : '-\n');
-                        console.log('pluginVersionsForPrint ====>', this.pluginVersionsForPrint);
+                        if (!this.testResult[plugins_list_1.pluginsList[i]]) {
+                            this.testResult[plugins_list_1.pluginsList[i]] = {};
+                        }
+                        this.testResult[plugins_list_1.pluginsList[i]].version = latestVersion;
+                        this.testResult[plugins_list_1.pluginsList[i]][workingDirectory] = isSuccess ? '+' : '-';
                         _a.label = 4;
                     case 4:
                         i++;
                         return [3 /*break*/, 1];
-                    case 5:
-                        core.setOutput("pluginVersionsForPrint", this.pluginVersionsForPrint);
-                        return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
@@ -202,11 +252,11 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        console.log('test the Plugin pluginName ====>');
+                        console.log('test the Plugin pluginName ====> ', pluginName);
                         isSuccess = false;
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 4, , 5]);
+                        _a.trys.push([1, 3, , 4]);
                         this.options.listeners = {
                             stdout: function (data) {
                                 // const myOutput = data.toString();
@@ -231,15 +281,14 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                                 isSuccess = false;
                             }
                         };
-                        return [4 /*yield*/, exec.exec('tns FAILED-build android', [], this.options)];
-                    case 3:
-                        _a.sent();
+                        // core.setFailed('BUILD FILED  ---- < ----');
+                        // await exec.exec('tns FAILED-build android', [], this.options);
                         return [2 /*return*/, isSuccess];
-                    case 4:
+                    case 3:
                         error_2 = _a.sent();
                         core.setFailed(error_2.message);
                         return [2 /*return*/, false];
-                    case 5: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
@@ -266,6 +315,19 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                 }
             });
         });
+    };
+    CheckForPluginUpdatesAction.prototype.setOutput = function () {
+        var output = '';
+        for (var _i = 0, pluginsList_1 = plugins_list_1.pluginsList; _i < pluginsList_1.length; _i++) {
+            var pluginName = pluginsList_1[_i];
+            output += this.needAddPluginsNames ? pluginName + this.delimiter + this.testResult[pluginName].version : '';
+            for (var _a = 0, _b = this.workingDirectories; _a < _b.length; _a++) {
+                var workingDirectory = _b[_a];
+                output += this.delimiter + this.testResult[pluginName][workingDirectory];
+            }
+            output += ';';
+        }
+        core.setOutput('pluginsTestResult', output);
     };
     return CheckForPluginUpdatesAction;
 }());

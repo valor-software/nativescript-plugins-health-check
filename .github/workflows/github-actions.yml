@@ -1,22 +1,19 @@
 name: Github-actions
 on: [push] # todo: test once a day
 env:
-  project: "ns-7-angular, ns-8-angular"
+  projects: "ns-7-angular, ns-8-angular" # folders
   TEMP_RESULT_FILE: "TEMP_RESULT_FILE.txt"
   REPORT_FILE: "REPORT_FILE.md"
   DELIMITER_IN_REPORT: '|'
 jobs:
   test-plugins-version:
-    strategy:
-      matrix:
-        os: [ubuntu-latest] # macos-latest
-        project: ["ns-7-angular"] #, "ns-8-angular"
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     outputs:
-#      matrix: ${{ steps.set-matrix.outputs.result }}
-      ubuntu-latest-ns-7-angular: ${{ steps.ubuntu-latest-ns-7-angular.outputs.result }}
-#      ns-7-angula: ${{ steps.setOutput.outputs.result }}
-#      ns-8-angular: ${{ steps.setOutput.outputs.result }}
+      ubuntu-angular-test-result: ${{ steps.ubuntu-angular-test-result.outputs.result }}
+      #      matrix: ${{ steps.test-result.outputs.result }}
+#      plugins: ${{ steps.test-result.outputs.plugins }}
+      #      outputs:
+      #        matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     env:
       ns-7-angular: 7.2.1 # set {N} version for every project for build and clean
@@ -27,111 +24,133 @@ jobs:
         with:
           node-version: '14'
 
-#      - run: exit 1
-
+      #      - run: exit 1
       - run: npm i
 
-
-
-
-      - name: Install {N} ${{ env[matrix.project] }}
-        working-directory: ./${{ matrix.project }}
-#        run: npm info nativescript version
-        run: npm install -g nativescript@${{ env[matrix.project] }}
-
-
-
       # https://www.voorhoede.nl/en/blog/super-fast-npm-install-on-github-actions/
-#      - name: Cache dependencies
-#        uses: actions/cache@v2
-#        with:
-#          path: ~/.npm
-#          key: npm-${{ hashFiles('package-lock.json') }}
-#          restore-keys: npm-
+      #      - name: Cache dependencies
+      #        uses: actions/cache@v2
+      #        with:
+      #          path: ~/.npm
+      #          key: npm-${{ hashFiles('package-lock.json') }}
+      #          restore-keys: npm-
 
-#      - name: Install dependencies
-#        working-directory: ./${{ matrix.project }}
-#        run: npm ci --ignore-scripts
-#        run: npm i   # it takes 30s
+      #      - name: Install dependencies
+      #        working-directory: ./${{ matrix.project }}
+      #        run: npm ci --ignore-scripts
+      #        run: npm i   # it takes 30s
 
+#todo: install different N versions
+#      - name: Install {N}
+#        run: npm info nativescript version
+#        run: npm install -g nativescript@${{ env[matrix.project] }} # {N} versions ??
+#        run: npm install -g nativescript
 
       - name: TEST PLUGINS
         id: testing
         uses: ./.github/actions/check-for-plugin-updates-action/
         with:
-          working-directory: ./${{ matrix.project }}
+          working-directories: ${{ env.projects }} # folders
+          add-plugins-names: "true" # folders
 
-      - name: Get plugin versions to store them in a table
-        id: ubuntu-latest-ns-7-angular
-        run: echo "::set-output name=result::${{ steps.testing.outputs.pluginVersionsForPrint }}"
-#        run: |
-#          echo "touch ${{ env.TEMP_RESULT_FILE }}"
-#          echo "${{ steps.testing.outputs.pluginVersionsForPrint }}" > ${{ env.TEMP_RESULT_FILE }}
+      - name: Get plugins test result
+        id: ubuntu-angular-test-result
+        run: |
+          echo "::set-output name=result::${{ steps.testing.outputs.pluginsTestResult }}"
+        #          echo "::set-output name=plugins::${{ steps.testing.outputs.pluginList }}"
 
-#      - id: set-matrix
-#        run: echo "::set-output name=matrix::{\"include\":[{\"project\":\"foo\",\"config\":\"Debug\"},{\"project\":\"bar\",\"config\":\"Release\"}]}"
-#
+
+
+  #        run: |
+  #          echo "touch ${{ env.TEMP_RESULT_FILE }}"
+  #          echo "${{ steps.testing.outputs.pluginVersionsForPrint }}" > ${{ env.TEMP_RESULT_FILE }}
+
+  #      - id: set-matrix
+  #        run: echo "::set-output name=matrix::{\"include\":[{\"project\":\"foo\",\"config\":\"Debug\"},{\"project\":\"bar\",\"config\":\"Release\"}]}"
+  #
   #      - run: npm install @actions/core
-#      - run: npm install @actions/exec
+  #      - run: npm install @actions/exec
 
-#      - run: tns clean
+  #      - run: tns clean
 
-#      - name: An error
-#        id: composer-run
-#        continue-on-error: true
-#        run: n install -g nativescript
+  #      - name: An error
+  #        id: composer-run
+  #        continue-on-error: true
+  #        run: n install -g nativescript
 
-#      - name: Execute tests
-#        if: steps.composer-run.outcome != 'success' || steps.composer-run.conclusion != 'success'
-#        run: echo "${{ steps.composer-run.outcome }}"
+  #      - name: Execute tests
+  #        if: steps.composer-run.outcome != 'success' || steps.composer-run.conclusion != 'success'
+  #        run: echo "${{ steps.composer-run.outcome }}"
 
 
 
 
 
   save-test-results:
-#    if: ${{ always() }}
+    #    if: ${{ always() }}
     runs-on: "ubuntu-latest"
     needs: test-plugins-version
     steps:
       - uses: actions/checkout@v2
-      - run: echo "-- ${{ needs.test-plugins-version.outputs.ubuntu-latest-ns-7-angular }}"
+      - run: |
+          echo "${{ needs.test-plugins-version.outputs.ubuntu-angular-test-result }}"
+#          echo "${{ needs.test-plugins-version.outputs.plugins }}"
+#          echo "${{ needs.test-plugins-version.outputs.ubuntu-ns-7-angular }}"
+
 
       # make a headline for the new report
       - name: Make a headline for the new report
         run: |
-          echo "№ ${{ env.DELIMITER_IN_REPORT }} Plugin ${{ env.DELIMITER_IN_REPORT }} Version ${{ env.DELIMITER_IN_REPORT }} Success" > ${{ env.REPORT_FILE }}
-          echo "| :---: | --- | :---: | :---: |" >> ${{ env.REPORT_FILE }}
+          echo ${{ env.REPORT_FILE }}
+          echo "| Plugin | Version | android {N}7  | android {N}8 | iOS {N}7 | iOS {N}8 |"> ${{ env.REPORT_FILE }}
+          echo "| --- | :---: | :---: | :---: | :---: | :---: |" >> ${{ env.REPORT_FILE }}
 
 
-
-#  echo | awk -v myvar=$q -v w=$w '{print myvar w}'
       - name: Get plugin versions to store them in a table
         run: |
-          ns7a="${{ needs.test-plugins-version.outputs.ubuntu-latest-ns-7-angular }}"
-          ns8a="${{ needs.test-plugins-version.outputs.ubuntu-latest-ns-7-angular }}"
-          echo | awk -v ns7a=$ns7a "{print ns7a }" && awk -v ns8a=$ns8a "{print $2 }" >> ${{ env.REPORT_FILE }}
+          echo "touch ubuntu-test-result.txt"
+          echo "${{ needs.test-plugins-version.outputs.ubuntu-angular-test-result }}" | awk '{gsub(/;/,"\n"); print;}' > ubuntu-test-result.txt
+          awk '{gsub(/,/," | "); print;}' ubuntu-test-result.txt >> ${{ env.REPORT_FILE }}
+
+       #          paste -d "," plugins.txt ubuntu-ns-7-angular.txt ubuntu-ns-8-angular.txt > ${{ env.TEMP_RESULT_FILE }}
+
+      #          echo awk '{gsub(/,/," | "); print;}' ${{ env.TEMP_RESULT_FILE }} >> ${{ env.REPORT_FILE }}
+
+      #          echo "${{ needs.test-plugins-version.outputs.ubuntu-ns-8-angular }}" | awk '{gsub(/;/,"\n"); print;}' > ubuntu-ns-8-angular.txt
+
+
+
+      #          plugins="${{ needs.test-plugins-version.outputs.plugins }}"
+      #          ns7a="${{ needs.test-plugins-version.outputs.ubuntu-latest-ns-7-angular }}"
+      #          ns8a="${{ needs.test-plugins-version.outputs.ubuntu-latest-ns-7-angular }}"
+      #          echo "**${{ needs.test-plugins-version.outputs.plugins }}"
+      #          echo "**${{ needs.test-plugins-version.outputs.ubuntu-latest-ns-7-angular }}"
+
+      #          echo | awk -v ns7a=$ns7a "{print ns7a }"
+      #          echo | awk -v ns7a=$ns7a -v ns8a=$ns8a "{print ns7a }" >> ${{ env.REPORT_FILE }}
 
       #          paste -d "|" ns-7-angular/${{ env.TEMP_RESULT_FILE }} ns-7-angular/${{ env.TEMP_RESULT_FILE }} > ${{ env.REPORT_FILE }}
 
 
-      - name: Show file content
-        run: |
-          pwd
-          ls -la
-          cat README.md
+      #      - name: Show file content
+      #        run: |
+      #          pwd
+      #          ls -la
+      #          cat README.md
 
-#      todo: remove temp
-#      - - name: Clean temp directory
-#          run: rm -rf *
-#          working-directory: ./temp
+      #      todo: remove temp
+      #      - - name: Clean temp directory
+      #          run: rm -rf *
+      #          working-directory: ./temp
 
       - name: Commit report
         run: |
           git config --global user.name 'Alex Sinitsa'
           git config --global user.email 'j0996602789@gmail.com'
+          git pull origin
           git status
           git add .
           git remote set-url origin https://x-access-token:${{ secrets.SECRET_GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git commit -am "Version update"
           git push
+
