@@ -1,4 +1,4 @@
 
 
-To test the new plugin just add it in this file
-```./.github/workflows/plugins-list.ts```
+You can see the result of testing the plugins at the following link:
+[PLUGINS_COMPATIBILITY.md](PLUGINS_COMPATIBILITY.md)

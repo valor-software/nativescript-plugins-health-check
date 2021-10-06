@@ -5,8 +5,12 @@ inputs:
     description: 'Where to run command'
     required: true
     default: './'
-  add-plugins-names:
-    description: 'If plugins names goes first in response'
+  nativescript-versions:
+    description: 'nativescript-versions for every project'
+    required: true
+    default: 'latest'
+  is-android:
+    description: ''
     required: false
     default: ''
 outputs:

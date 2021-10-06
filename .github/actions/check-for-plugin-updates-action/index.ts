@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import { ExecOptions } from "@actions/exec/lib/interfaces";
 
-import { pluginsList } from "../../workflows/plugins-list";
+import { pluginsList } from "../../plugins-list";
 
 
 interface PluginVersion {
@@ -17,47 +17,54 @@ interface TestResultItem {
 
 
 class CheckForPluginUpdatesAction {
-  FILE_NAME_FOR_REPORT = 'PLUGINS_COMPATIBILITY.md';
+  FILE_NAME_FOR_REPORT = '../PLUGINS_COMPATIBILITY.md';
   delimiter = ', ';
   options: ExecOptions = {};
   myError = '';
   testResult: { [key: string]: TestResultItem } = {};
   pluginsVersions: { [key: number]: PluginVersion } = {};
   workingDirectories: string[] = [];
-  needAddPluginsNames = false;
+  nativescriptVersions: string[] = [];
+  isAndroid = false;
 
 
   async start() {
     let foundedNewVersion = false;
 
     try {
-      this.needAddPluginsNames = !!core.getInput('add-plugins-names');
+      this.nativescriptVersions = core.getInput('nativescript-versions').replace(/\s/g, '').split(',');
       this.workingDirectories = core.getInput('working-directories').replace(/\s/g, '').split(',');
-      console.log('workingDirectories ====>', this.workingDirectories);
+      this.isAndroid = !!core.getInput('is-android');
+
       if (!this.workingDirectories || !this.workingDirectories.length) {
         core.setFailed('No projects to test!');
         return;
       }
 
-      for await (const workingDirectory of this.workingDirectories) {
-        if (!workingDirectory) {
+      for (let i = 0; i < this.workingDirectories.length; i++) {
+        if (!this.workingDirectories[i]) {
           return;
         }
 
-        console.log(`Current working directory is ${workingDirectory}!`);
+        this.options.cwd = './' + this.workingDirectories[i];
 
-        this.options.cwd = './' + workingDirectory;
+        this.options.listeners = {
+          stderr: (data) => {
+            this.myError += '=install {N}=' + data.toString();
+          }
+        };
+
+        await exec.exec(`npm uninstall -g nativescript`, [], this.options);
+        await exec.exec(`npm install -g nativescript@${this.nativescriptVersions[i]} `, [], this.options);
 
         for (let i = 0; i < pluginsList.length; i++) {
           const pluginName = pluginsList[i];
-          console.log('pluginName ! ====>', pluginName);
+          console.log('pluginName ====> ', pluginName);
           this.pluginsVersions[i] = {};
-
 
           this.options.listeners = {
             stdout: (data) => {
               const myOutput = data.toString().trim();
-              // const match = myOutput.match(/[0-9.]+$/g) || [];
               const match = myOutput.match(/[0-9.]+/g) || [];
               this.pluginsVersions[i].tested = match[0];
             },
@@ -65,8 +72,7 @@ class CheckForPluginUpdatesAction {
               this.myError += '=grep tested=' + data.toString();
             }
           };
-          // await exec.exec('npm list ' + pluginName + ' --depth=0', [], options);
-          // todo: move ignoreReturnCode to options
+          // find the last tested version of the plugin in PLUGINS_COMPATIBILITY.md, where the test results are saved
           await exec.exec(`grep ${pluginName} ${this.FILE_NAME_FOR_REPORT}`, [], {
             ...this.options,
             ignoreReturnCode: true
@@ -103,17 +109,14 @@ class CheckForPluginUpdatesAction {
         }
 
         if (foundedNewVersion) {
-          // this.pluginsTestResult += workingDirectories + ';';
-          await this.updatePlugins(workingDirectory);
+          await this.updatePlugins(this.workingDirectories[i]);
         } else {
           console.log(`No updates for plugins!`);
+          return;
         }
       }
 
       this.setOutput();
-      // Get the JSON webhook payload for the event that triggered the workflow
-      // const payload = JSON.stringify(github.context.payload, undefined, 2)
-      // console.log(`The event payload: ${payload}`);
 
     } catch (error) {
       core.setFailed(error.message);
@@ -128,7 +131,6 @@ class CheckForPluginUpdatesAction {
       let isSuccess = true;
 
       if (latestVersion && testedVersion !== latestVersion) {
-        console.log('<===    PLUGIN TEST IS HERE     ====>');
         isSuccess = await this.testPlugin(pluginsList[i], latestVersion);
         // await this.uninstallPlugin(this.pluginsVersions[i]);
       }
@@ -144,12 +146,10 @@ class CheckForPluginUpdatesAction {
 
 
   async testPlugin(pluginName, version) {
-    console.log('test the Plugin pluginName ====> ', pluginName);
     let isSuccess = false;
     try {
       this.options.listeners = {
         stdout: (data) => {
-          // const myOutput = data.toString();
           isSuccess = true;
         },
         stderr: (data) => {
@@ -161,17 +161,16 @@ class CheckForPluginUpdatesAction {
 
       this.options.listeners = {
         stdout: (data) => {
-          // const myOutput = data.toString();
           isSuccess = true;
         },
         stderr: (data) => {
           this.myError += '=tns build android=' + data.toString();
-          console.log('this.myError ====>', this.myError);
           isSuccess = false
         }
       };
-      // core.setFailed('BUILD FILED  ---- < ----');
-      // await exec.exec('tns FAILED-build android', [], this.options);
+
+      console.log('this.options ====>', this.options);
+      await exec.exec(`tns build ${ this.isAndroid ? 'android' : 'ios'}`, [], this.options);
 
       return isSuccess;
 
@@ -183,11 +182,7 @@ class CheckForPluginUpdatesAction {
 
 
   async uninstallPlugin(pluginName) {
-    console.log('uninstallPlugin ====>');
     this.options.listeners = {
-      stdout: (data) => {
-        // const myOutput = data.toString();
-      },
       stderr: (data) => {
         this.myError += '=npm uninstall=' + data.toString();
       }
@@ -200,12 +195,13 @@ class CheckForPluginUpdatesAction {
     let output = '';
 
     for (const pluginName of pluginsList) {
-      output += this.needAddPluginsNames ? pluginName + this.delimiter + this.testResult[pluginName].version : '';
+      output += this.isAndroid ? pluginName + this.delimiter + this.testResult[pluginName].version + this.delimiter : '';
 
       for (const workingDirectory of this.workingDirectories) {
-        output += this.delimiter + this.testResult[pluginName][workingDirectory];
+        output += this.testResult[pluginName][workingDirectory] + this.delimiter;
       }
-      output += ';';
+      output = output.replace(/[,\s]+$/, ';');
+      console.log('output =>', output);
     }
 
     core.setOutput('pluginsTestResult', output);
