@@ -6,66 +6,66 @@ env:
   TEMP_REPORT_FILE: "temp/temp-results.txt"
   REPORT_FILE: "PLUGINS_COMPATIBILITY.md"
 jobs:
-#  test-android:
-#    runs-on: ubuntu-latest
+  test-android:
+    runs-on: ubuntu-latest
+    outputs:
+      ubuntu-angular-test-result: ${{ steps.ubuntu-angular-test-result.outputs.result }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      - run: npm i
+
+      # - run: exit 1
+
+      - name: TEST PLUGINS
+        id: testing
+        uses: ./.github/actions/check-for-plugin-updates-action/
+        with:
+          working-directories: ${{ env.projects }} # folders
+          nativescript-versions: ${{ env.nativescript }} # nativescript versions
+          is-android: "true"
+
+      - name: Get plugins test result
+        id: ubuntu-angular-test-result
+        run: |
+          echo "::set-output name=result::${{ steps.testing.outputs.pluginsTestResult }}"
+
+    #      - name: An error
+    #        id: composer-run
+    #        continue-on-error: true
+    #        run: n install -g nativescript
+    #      - name: Execute tests
+    #        if: steps.composer-run.outcome != 'success' || steps.composer-run.conclusion != 'success'
+    #        run: echo "${{ steps.composer-run.outcome }}"
+
+#  test-ios:
+#    runs-on: macos-latest
 #    outputs:
-#      ubuntu-angular-test-result: ${{ steps.ubuntu-angular-test-result.outputs.result }}
+#      mac-angular-test-result: ${{ steps.mac-angular-test-result.outputs.result }}
 #    steps:
 #      - uses: actions/checkout@v2
 #      - uses: actions/setup-node@v2
 #        with:
 #          node-version: '14'
+#      - run: ruby -v
+#      - run: python -m pip install six
 #      - run: npm i
 #
-#      # - run: exit 1
-#
-#      - name: TEST PLUGINS
-#        id: testing
+#      - name: TEST PLUGINS FOR IOS
+#        id: testing-ios
 #        uses: ./.github/actions/check-for-plugin-updates-action/
 #        with:
 #          working-directories: ${{ env.projects }} # folders
 #          nativescript-versions: ${{ env.nativescript }} # nativescript versions
-#          is-android: "true"
 #
 #      - name: Get plugins test result
-#        id: ubuntu-angular-test-result
+#        id: mac-angular-test-result
 #        run: |
-#          echo "::set-output name=result::${{ steps.testing.outputs.pluginsTestResult }}"
+#          echo "::set-output name=result::${{ steps.testing-ios.outputs.pluginsTestResult }}"
 #
-#    #      - name: An error
-#    #        id: composer-run
-#    #        continue-on-error: true
-#    #        run: n install -g nativescript
-#    #      - name: Execute tests
-#    #        if: steps.composer-run.outcome != 'success' || steps.composer-run.conclusion != 'success'
-#    #        run: echo "${{ steps.composer-run.outcome }}"
-
-  test-ios:
-    runs-on: macos-latest
-    outputs:
-      mac-angular-test-result: ${{ steps.mac-angular-test-result.outputs.result }}
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-      - run: ruby -v
-      - run: python -m pip install six
-      - run: npm i
-
-      - name: TEST PLUGINS FOR IOS
-        id: testing-ios
-        uses: ./.github/actions/check-for-plugin-updates-action/
-        with:
-          working-directories: ${{ env.projects }} # folders
-          nativescript-versions: ${{ env.nativescript }} # nativescript versions
-
-      - name: Get plugins test result
-        id: mac-angular-test-result
-        run: |
-          echo "::set-output name=result::${{ steps.testing-ios.outputs.pluginsTestResult }}"
-
-
+#
 #  save-test-results:
 #    runs-on: "ubuntu-latest"
 #    needs: [test-android, test-ios]

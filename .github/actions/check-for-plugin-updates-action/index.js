@@ -198,26 +198,29 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                         i = 0;
                         _a.label = 1;
                     case 1:
-                        if (!(i < plugins_list_1.pluginsList.length)) return [3 /*break*/, 5];
+                        if (!(i < plugins_list_1.pluginsList.length)) return [3 /*break*/, 6];
                         testedVersion = this.pluginsVersions[i].tested;
                         latestVersion = this.pluginsVersions[i].latest;
                         isSuccess = true;
-                        if (!(latestVersion && testedVersion !== latestVersion)) return [3 /*break*/, 3];
+                        if (!(latestVersion && testedVersion !== latestVersion)) return [3 /*break*/, 4];
                         return [4 /*yield*/, this.testPlugin(plugins_list_1.pluginsList[i], latestVersion)];
                     case 2:
                         isSuccess = _a.sent();
-                        _a.label = 3;
+                        return [4 /*yield*/, this.uninstallPlugin(plugins_list_1.pluginsList[i])];
                     case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4:
                         if (!this.testResult[plugins_list_1.pluginsList[i]]) {
                             this.testResult[plugins_list_1.pluginsList[i]] = {};
                         }
                         this.testResult[plugins_list_1.pluginsList[i]].version = latestVersion;
                         this.testResult[plugins_list_1.pluginsList[i]][workingDirectory] = isSuccess ? '+' : '-';
-                        _a.label = 4;
-                    case 4:
+                        _a.label = 5;
+                    case 5:
                         i++;
                         return [3 /*break*/, 1];
-                    case 5: return [2 /*return*/];
+                    case 6: return [2 /*return*/];
                 }
             });
         });
@@ -232,7 +235,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                         isSuccess = false;
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 4, , 5]);
+                        _a.trys.push([1, 6, , 7]);
                         this.options.listeners = {
                             stdout: function (data) {
                                 isSuccess = true;
@@ -255,15 +258,31 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                             }
                         };
                         console.log('this.options ====>', this.options);
-                        return [4 /*yield*/, exec.exec("tns build " + (this.isAndroid ? 'android' : 'ios'), [], this.options)];
+                        // add
+                        // await exec.exec(`ns platform remove ${ this.isAndroid ? 'android' : 'ios'}`, [], {
+                        //   ...this.options,
+                        //   ignoreReturnCode: true
+                        // });
+                        return [4 /*yield*/, exec.exec("ns clean", [], __assign(__assign({}, this.options), { ignoreReturnCode: true }))];
                     case 3:
+                        // add
+                        // await exec.exec(`ns platform remove ${ this.isAndroid ? 'android' : 'ios'}`, [], {
+                        //   ...this.options,
+                        //   ignoreReturnCode: true
+                        // });
+                        _a.sent();
+                        return [4 /*yield*/, exec.exec("npm i", [], __assign(__assign({}, this.options), { ignoreReturnCode: true }))];
+                    case 4:
+                        _a.sent();
+                        return [4 /*yield*/, exec.exec("ns build " + (this.isAndroid ? 'android' : 'ios'), [], __assign(__assign({}, this.options), { ignoreReturnCode: true }))];
+                    case 5:
                         _a.sent();
                         return [2 /*return*/, isSuccess];
-                    case 4:
+                    case 6:
                         error_2 = _a.sent();
                         core.setFailed(error_2.message);
                         return [2 /*return*/, false];
-                    case 5: return [2 /*return*/];
+                    case 7: return [2 /*return*/];
                 }
             });
         });

@@ -132,7 +132,7 @@ class CheckForPluginUpdatesAction {
 
       if (latestVersion && testedVersion !== latestVersion) {
         isSuccess = await this.testPlugin(pluginsList[i], latestVersion);
-        // await this.uninstallPlugin(this.pluginsVersions[i]);
+        await this.uninstallPlugin(pluginsList[i]);
       }
 
       if (!this.testResult[pluginsList[i]]) {
@@ -170,7 +170,26 @@ class CheckForPluginUpdatesAction {
       };
 
       console.log('this.options ====>', this.options);
-      await exec.exec(`tns build ${ this.isAndroid ? 'android' : 'ios'}`, [], this.options);
+
+      // add
+      // await exec.exec(`ns platform remove ${ this.isAndroid ? 'android' : 'ios'}`, [], {
+      //   ...this.options,
+      //   ignoreReturnCode: true
+      // });
+      await exec.exec(`ns clean`, [], {
+        ...this.options,
+        ignoreReturnCode: true
+      });
+
+      await exec.exec(`npm i`, [], {
+        ...this.options,
+        ignoreReturnCode: true
+      });
+
+      await exec.exec(`ns build ${ this.isAndroid ? 'android' : 'ios'}`, [], {
+        ...this.options,
+        ignoreReturnCode: true
+      });
 
       return isSuccess;
 
