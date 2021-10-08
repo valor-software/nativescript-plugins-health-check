@@ -235,7 +235,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                         isSuccess = false;
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 6, , 7]);
+                        _a.trys.push([1, 4, , 5]);
                         this.options.listeners = {
                             stdout: function (data) {
                                 isSuccess = true;
@@ -258,31 +258,15 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                             }
                         };
                         console.log('this.options ====>', this.options);
-                        // add
-                        // await exec.exec(`ns platform remove ${ this.isAndroid ? 'android' : 'ios'}`, [], {
-                        //   ...this.options,
-                        //   ignoreReturnCode: true
-                        // });
-                        return [4 /*yield*/, exec.exec("ns clean", [], __assign(__assign({}, this.options), { ignoreReturnCode: true }))];
+                        return [4 /*yield*/, exec.exec("tns build " + (this.isAndroid ? 'android' : 'ios'), [], this.options)];
                     case 3:
-                        // add
-                        // await exec.exec(`ns platform remove ${ this.isAndroid ? 'android' : 'ios'}`, [], {
-                        //   ...this.options,
-                        //   ignoreReturnCode: true
-                        // });
-                        _a.sent();
-                        return [4 /*yield*/, exec.exec("npm i", [], __assign(__assign({}, this.options), { ignoreReturnCode: true }))];
-                    case 4:
-                        _a.sent();
-                        return [4 /*yield*/, exec.exec("ns build " + (this.isAndroid ? 'android' : 'ios'), [], __assign(__assign({}, this.options), { ignoreReturnCode: true }))];
-                    case 5:
                         _a.sent();
                         return [2 /*return*/, isSuccess];
-                    case 6:
+                    case 4:
                         error_2 = _a.sent();
                         core.setFailed(error_2.message);
                         return [2 /*return*/, false];
-                    case 7: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });

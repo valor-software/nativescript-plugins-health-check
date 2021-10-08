@@ -170,26 +170,7 @@ class CheckForPluginUpdatesAction {
       };
 
       console.log('this.options ====>', this.options);
-
-      // add
-      // await exec.exec(`ns platform remove ${ this.isAndroid ? 'android' : 'ios'}`, [], {
-      //   ...this.options,
-      //   ignoreReturnCode: true
-      // });
-      await exec.exec(`ns clean`, [], {
-        ...this.options,
-        ignoreReturnCode: true
-      });
-
-      await exec.exec(`npm i`, [], {
-        ...this.options,
-        ignoreReturnCode: true
-      });
-
-      await exec.exec(`ns build ${ this.isAndroid ? 'android' : 'ios'}`, [], {
-        ...this.options,
-        ignoreReturnCode: true
-      });
+      await exec.exec(`tns build ${ this.isAndroid ? 'android' : 'ios'}`, [], this.options);
 
       return isSuccess;
 

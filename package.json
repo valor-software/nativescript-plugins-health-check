@@ -2,9 +2,9 @@
   "name": "nativescript-plugins-test",
   "version": "1.0.0",
   "description": "testing of nativescript plugins ",
-  "main": ".github/actions/check-for-plugin-updates-action/index.js",
+  "main": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm i && tsc -w .github/plugins-list.ts .github/actions/check-for-plugin-updates-action/index.ts"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   "devDependencies": {
     "@actions/core": "^1.6.0",
     "@actions/exec": "^1.1.0",
+    "@types/node": "^16.10.3",
     "typescript": "^4.4.3"
   }
 }

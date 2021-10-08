@@ -20,8 +20,6 @@
     "url": "https://github.com/NativeScript/NativeScript/issues"
   },
   "dependencies": {
-    "@actions/core": "^1.6.0",
-    "@actions/exec": "^1.1.0",
     "@actions/github": "^5.0.0",
     "@angular/animations": "~11.2.0",
     "@angular/common": "~11.2.0",
@@ -31,7 +29,6 @@
     "@angular/platform-browser": "~11.2.0",
     "@angular/platform-browser-dynamic": "~11.2.0",
     "@angular/router": "~11.2.0",
-    "@nativescript-community/ui-material-button": "^6.0.5",
     "@nativescript/angular": "~11.0.0",
     "@nativescript/core": "~7.3.0",
     "@nativescript/theme": "~3.0.0",
