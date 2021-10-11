@@ -150,7 +150,6 @@ class CheckForPluginUpdatesAction {
 
 
   async testPlugin(plugin: pluginI, version) {
-    const filePath = `${this.options.cwd}/src/app/app-routing.module.ts`;
     let isSuccess = false;
 
     try {
@@ -165,7 +164,7 @@ class CheckForPluginUpdatesAction {
       };
       await exec.exec('npm install ' + plugin.name + '@' + version + ' --save-exact', [], this.options);
 
-      await this.activateDemoModule(plugin);
+      await this.activatePluginModule(plugin);
 
       this.options.listeners = {
         stdout: (data) => {
@@ -173,24 +172,27 @@ class CheckForPluginUpdatesAction {
         },
         stderr: (data) => {
           this.myError += '=tns build=' + data.toString();
-          isSuccess = false
+          isSuccess = false;
         }
       };
-      await exec.exec(`tns build ${ this.isAndroid ? 'android' : 'ios'}`, [], this.options);
+      await exec.exec(`tns build ${ this.isAndroid ? 'android' : 'ios'}`, [], {
+        ...this.options,
+        ignoreReturnCode: true
+      });
       // restore default routing
-      await exec.exec(`cat ${filePath}.bkp > ${filePath}`, [], this.options);
+      const filePath = `./src/app/app-routing.module.ts`;
+      await exec.exec(`cat ${filePath}.bkp >> ${filePath}`, [], this.options);
 
       return isSuccess;
 
     } catch (error) {
-      core.setFailed(error.message);
+      // core.setFailed(error.message);
+      console.log(`Test for plugin ${plugin.name} finished with the error: ====>`, error.message);
       return false;
     }
   }
 
-  async activateDemoModule(plugin: pluginI) {
-    // sed -i'.bkp' -e "s/{ path: 'test', loadChildren: () => import('\.\/plugins\/\.default')\.then((m) => m.DefaultModule) }/o/" ns-7-angular/src/app/app-routing.module.ts
-    // const pluginDemoRoute = `{ path: 'test', loadChildren: () => import('\.\/plugins\/${plugin.folderName}')\.then((m) => m.${plugin.moduleName}) }`;
+  async activatePluginModule(plugin: pluginI) {
     const filePath = `./src/app/app-routing.module.ts`;
     this.options.listeners = {
       stderr: (data) => {
@@ -198,7 +200,7 @@ class CheckForPluginUpdatesAction {
       }
     };
     // -i'.bkp' to make a backup
-    await exec.exec(`sed -i'' -e "s/\.default /${plugin.folderName}/" ${filePath}`, [], this.options);
+    await exec.exec(`sed -i'' -e "s/\.default/${plugin.folderName}/" ${filePath}`, [], this.options);
     await exec.exec(`sed -i'' -e "s/DefaultModule/${plugin.moduleName}/" ${filePath}`, [], this.options);
     await exec.exec(`cat ${filePath}`, [], this.options);
   }

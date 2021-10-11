@@ -229,12 +229,11 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
     };
     CheckForPluginUpdatesAction.prototype.testPlugin = function (plugin, version) {
         return __awaiter(this, void 0, void 0, function () {
-            var filePath, isSuccess, error_2;
+            var isSuccess, filePath, error_2;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        filePath = this.options.cwd + "/src/app/app-routing.module.ts";
                         isSuccess = false;
                         _a.label = 1;
                     case 1:
@@ -251,7 +250,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                         return [4 /*yield*/, exec.exec('npm install ' + plugin.name + '@' + version + ' --save-exact', [], this.options)];
                     case 2:
                         _a.sent();
-                        return [4 /*yield*/, this.activateDemoModule(plugin)];
+                        return [4 /*yield*/, this.activatePluginModule(plugin)];
                     case 3:
                         _a.sent();
                         this.options.listeners = {
@@ -263,25 +262,25 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                                 isSuccess = false;
                             }
                         };
-                        return [4 /*yield*/, exec.exec("tns build " + (this.isAndroid ? 'android' : 'ios'), [], this.options)];
+                        return [4 /*yield*/, exec.exec("tns build " + (this.isAndroid ? 'android' : 'ios'), [], __assign(__assign({}, this.options), { ignoreReturnCode: true }))];
                     case 4:
                         _a.sent();
-                        // restore default routing
-                        return [4 /*yield*/, exec.exec("cat " + filePath + ".bkp > " + filePath, [], this.options)];
+                        filePath = "./src/app/app-routing.module.ts";
+                        return [4 /*yield*/, exec.exec("cat " + filePath + ".bkp >> " + filePath, [], this.options)];
                     case 5:
-                        // restore default routing
                         _a.sent();
                         return [2 /*return*/, isSuccess];
                     case 6:
                         error_2 = _a.sent();
-                        core.setFailed(error_2.message);
+                        // core.setFailed(error.message);
+                        console.log("Test for plugin " + plugin.name + " finished with the error: ====>", error_2.message);
                         return [2 /*return*/, false];
                     case 7: return [2 /*return*/];
                 }
             });
         });
     };
-    CheckForPluginUpdatesAction.prototype.activateDemoModule = function (plugin) {
+    CheckForPluginUpdatesAction.prototype.activatePluginModule = function (plugin) {
         return __awaiter(this, void 0, void 0, function () {
             var filePath;
             var _this = this;
@@ -295,7 +294,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                             }
                         };
                         // -i'.bkp' to make a backup
-                        return [4 /*yield*/, exec.exec("sed -i'' -e \"s/.default /" + plugin.folderName + "/\" " + filePath, [], this.options)];
+                        return [4 /*yield*/, exec.exec("sed -i'' -e \"s/.default/" + plugin.folderName + "/\" " + filePath, [], this.options)];
                     case 1:
                         // -i'.bkp' to make a backup
                         _a.sent();
