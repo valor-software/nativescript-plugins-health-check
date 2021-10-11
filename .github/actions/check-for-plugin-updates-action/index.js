@@ -105,7 +105,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                             return __generator(this, function (_d) {
                                 switch (_d.label) {
                                     case 0:
-                                        pluginName = plugins_list_1.pluginsList[i_1];
+                                        pluginName = plugins_list_1.pluginsList[i_1].name;
                                         console.log('pluginName ====> ', pluginName);
                                         this_1.pluginsVersions[i_1] = {};
                                         this_1.options.listeners = {
@@ -191,7 +191,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
     };
     CheckForPluginUpdatesAction.prototype.updatePlugins = function (workingDirectory) {
         return __awaiter(this, void 0, void 0, function () {
-            var i, testedVersion, latestVersion, isSuccess;
+            var i, pluginName, testedVersion, latestVersion, isSuccess;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -199,6 +199,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                         _a.label = 1;
                     case 1:
                         if (!(i < plugins_list_1.pluginsList.length)) return [3 /*break*/, 6];
+                        pluginName = plugins_list_1.pluginsList[i].name;
                         testedVersion = this.pluginsVersions[i].tested;
                         latestVersion = this.pluginsVersions[i].latest;
                         isSuccess = true;
@@ -206,16 +207,17 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                         return [4 /*yield*/, this.testPlugin(plugins_list_1.pluginsList[i], latestVersion)];
                     case 2:
                         isSuccess = _a.sent();
-                        return [4 /*yield*/, this.uninstallPlugin(plugins_list_1.pluginsList[i])];
+                        return [4 /*yield*/, this.uninstallPlugin(pluginName)];
                     case 3:
                         _a.sent();
                         _a.label = 4;
                     case 4:
-                        if (!this.testResult[plugins_list_1.pluginsList[i]]) {
-                            this.testResult[plugins_list_1.pluginsList[i]] = {};
+                        // save testing info in this.testResult
+                        if (!this.testResult[pluginName]) {
+                            this.testResult[pluginName] = {};
                         }
-                        this.testResult[plugins_list_1.pluginsList[i]].version = latestVersion;
-                        this.testResult[plugins_list_1.pluginsList[i]][workingDirectory] = isSuccess ? '+' : '-';
+                        this.testResult[pluginName].version = latestVersion;
+                        this.testResult[pluginName][workingDirectory] = isSuccess ? '+' : '-';
                         _a.label = 5;
                     case 5:
                         i++;
@@ -225,17 +227,18 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
             });
         });
     };
-    CheckForPluginUpdatesAction.prototype.testPlugin = function (pluginName, version) {
+    CheckForPluginUpdatesAction.prototype.testPlugin = function (plugin, version) {
         return __awaiter(this, void 0, void 0, function () {
-            var isSuccess, error_2;
+            var filePath, isSuccess, error_2;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        filePath = this.options.cwd + "/src/app/app-routing.module.ts";
                         isSuccess = false;
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 4, , 5]);
+                        _a.trys.push([1, 6, , 7]);
                         this.options.listeners = {
                             stdout: function (data) {
                                 isSuccess = true;
@@ -245,28 +248,64 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                                 isSuccess = false;
                             }
                         };
-                        return [4 /*yield*/, exec.exec('npm install ' + pluginName + '@' + version + ' --save-exact', [], this.options)];
+                        return [4 /*yield*/, exec.exec('npm install ' + plugin.name + '@' + version + ' --save-exact', [], this.options)];
                     case 2:
+                        _a.sent();
+                        return [4 /*yield*/, this.activateDemoModule(plugin)];
+                    case 3:
                         _a.sent();
                         this.options.listeners = {
                             stdout: function (data) {
                                 isSuccess = true;
                             },
                             stderr: function (data) {
-                                _this.myError += '=tns build android=' + data.toString();
+                                _this.myError += '=tns build=' + data.toString();
                                 isSuccess = false;
                             }
                         };
-                        console.log('this.options ====>', this.options);
                         return [4 /*yield*/, exec.exec("tns build " + (this.isAndroid ? 'android' : 'ios'), [], this.options)];
-                    case 3:
+                    case 4:
+                        _a.sent();
+                        // restore default routing
+                        return [4 /*yield*/, exec.exec("cat " + filePath + ".bkp > " + filePath, [], this.options)];
+                    case 5:
+                        // restore default routing
                         _a.sent();
                         return [2 /*return*/, isSuccess];
-                    case 4:
+                    case 6:
                         error_2 = _a.sent();
                         core.setFailed(error_2.message);
                         return [2 /*return*/, false];
-                    case 5: return [2 /*return*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CheckForPluginUpdatesAction.prototype.activateDemoModule = function (plugin) {
+        return __awaiter(this, void 0, void 0, function () {
+            var filePath;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        filePath = "./src/app/app-routing.module.ts";
+                        this.options.listeners = {
+                            stderr: function (data) {
+                                _this.myError += '=change routing=' + data.toString();
+                            }
+                        };
+                        // -i'.bkp' to make a backup
+                        return [4 /*yield*/, exec.exec("sed -i'' -e \"s/.default /" + plugin.folderName + "/\" " + filePath, [], this.options)];
+                    case 1:
+                        // -i'.bkp' to make a backup
+                        _a.sent();
+                        return [4 /*yield*/, exec.exec("sed -i'' -e \"s/DefaultModule/" + plugin.moduleName + "/\" " + filePath, [], this.options)];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, exec.exec("cat " + filePath, [], this.options)];
+                    case 3:
+                        _a.sent();
+                        return [2 /*return*/];
                 }
             });
         });
@@ -293,11 +332,11 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
     CheckForPluginUpdatesAction.prototype.setOutput = function () {
         var output = '';
         for (var _i = 0, pluginsList_1 = plugins_list_1.pluginsList; _i < pluginsList_1.length; _i++) {
-            var pluginName = pluginsList_1[_i];
-            output += this.isAndroid ? pluginName + this.delimiter + this.testResult[pluginName].version + this.delimiter : '';
+            var plugin = pluginsList_1[_i];
+            output += this.isAndroid ? plugin.name + this.delimiter + this.testResult[plugin.name].version + this.delimiter : '';
             for (var _a = 0, _b = this.workingDirectories; _a < _b.length; _a++) {
                 var workingDirectory = _b[_a];
-                output += this.testResult[pluginName][workingDirectory] + this.delimiter;
+                output += this.testResult[plugin.name][workingDirectory] + this.delimiter;
             }
             output = output.replace(/[,\s]+$/, ';');
             console.log('output =>', output);

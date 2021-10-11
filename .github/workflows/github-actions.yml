@@ -14,10 +14,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: '14'
       - run: npm i
-
-      # - run: exit 1
 
       - name: TEST PLUGINS
         id: testing
@@ -32,6 +30,7 @@ jobs:
         run: |
           echo "::set-output name=result::${{ steps.testing.outputs.pluginsTestResult }}"
 
+    #      - run: exit 1
     #      - name: An error
     #        id: composer-run
     #        continue-on-error: true
@@ -40,75 +39,75 @@ jobs:
     #        if: steps.composer-run.outcome != 'success' || steps.composer-run.conclusion != 'success'
     #        run: echo "${{ steps.composer-run.outcome }}"
 
-  test-ios:
-    runs-on: macos-latest
-    outputs:
-      mac-angular-test-result: ${{ steps.mac-angular-test-result.outputs.result }}
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-      - run: ruby -v
-      - run: python -m pip install six
-      - run: npm i
-
-      - name: TEST PLUGINS FOR IOS
-        id: testing-ios
-        uses: ./.github/actions/check-for-plugin-updates-action/
-        with:
-          working-directories: ${{ env.projects }} # folders
-          nativescript-versions: ${{ env.nativescript }} # nativescript versions
-
-      - name: Get plugins test result
-        id: mac-angular-test-result
-        run: |
-          echo "::set-output name=result::${{ steps.testing-ios.outputs.pluginsTestResult }}"
-
-
-  save-test-results:
-    runs-on: "ubuntu-latest"
-    needs: [test-android, test-ios]
-    steps:
-      - uses: actions/checkout@v2
-      - run: |
-          echo "${{ needs.test-android.outputs.ubuntu-angular-test-result }}"
-          echo "${{ needs.test-ios.outputs.mac-angular-test-result }}"
-
-      - name: Make a headline for the new report
-        run: |
-          echo ${{ env.REPORT_FILE }}
-          echo "| Plugin | Version | android {N}7  | android {N}8 | iOS {N}7 | iOS {N}8 |"> ${{ env.REPORT_FILE }}
-          echo "| --- | :---: | :---: | :---: | :---: | :---: |" >> ${{ env.REPORT_FILE }}
-
-      - name: Get plugin versions to store them in a table
-        run: |
-          mkdir temp && touch temp/ubuntu-test-result.txt temp/mac-result.txt ${{ env.TEMP_REPORT_FILE }} ${{ env.REPORT_FILE }}
-
-          echo "${{ needs.test-android.outputs.ubuntu-angular-test-result }}" | awk '{gsub(/;/,"\n"); print;}' > temp/ubuntu-test-result.txt
-          echo "${{ needs.test-ios.outputs.mac-angular-test-result }}" | awk '{gsub(/;/,"\n"); print;}' > temp/mac-result.txt
-
-          paste -d "," temp/ubuntu-test-result.txt temp/mac-result.txt > ${{ env.TEMP_REPORT_FILE }}
-          awk '{gsub(/,/," | "); print;}' ${{ env.TEMP_REPORT_FILE }} >> ${{ env.REPORT_FILE }}
-
-      #      - name: Show file content
-      #        run: |
-      #          pwd
-      #          ls -la
-      #          cat README.md
-
-      #      todo: remove temp and run "tns clean"
-      #      - - name: Clean temp directory
-      #          run: rm -rf *
-      #          working-directory: ./temp
-
-      - name: Commit report
-        run: |
-          git config --global user.name 'Alex Sinitsa'
-          git config --global user.email 'j0996602789@gmail.com'
-          git status
-          git add .
-          git remote set-url origin https://x-access-token:${{ secrets.SECRET_GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git commit -am "Version update"
-          git push
-
+#  test-ios:
+#    runs-on: macos-latest
+#    outputs:
+#      mac-angular-test-result: ${{ steps.mac-angular-test-result.outputs.result }}
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/setup-node@v2
+#        with:
+#          node-version: '14'
+#      - run: ruby -v
+#      - run: python -m pip install six
+#      - run: npm i
+#
+#      - name: TEST PLUGINS FOR IOS
+#        id: testing-ios
+#        uses: ./.github/actions/check-for-plugin-updates-action/
+#        with:
+#          working-directories: ${{ env.projects }} # folders
+#          nativescript-versions: ${{ env.nativescript }} # nativescript versions
+#
+#      - name: Get plugins test result
+#        id: mac-angular-test-result
+#        run: |
+#          echo "::set-output name=result::${{ steps.testing-ios.outputs.pluginsTestResult }}"
+#
+#
+#  save-test-results:
+#    runs-on: "ubuntu-latest"
+#    needs: [test-android, test-ios]
+#    steps:
+#      - uses: actions/checkout@v2
+#      - run: |
+#          echo "${{ needs.test-android.outputs.ubuntu-angular-test-result }}"
+#          echo "${{ needs.test-ios.outputs.mac-angular-test-result }}"
+#
+#      - name: Make a headline for the new report
+#        run: |
+#          echo ${{ env.REPORT_FILE }}
+#          echo "| Plugin | Version | android {N}7  | android {N}8 | iOS {N}7 | iOS {N}8 |"> ${{ env.REPORT_FILE }}
+#          echo "| --- | :---: | :---: | :---: | :---: | :---: |" >> ${{ env.REPORT_FILE }}
+#
+#      - name: Get plugin versions to store them in a table
+#        run: |
+#          mkdir temp && touch temp/ubuntu-test-result.txt temp/mac-result.txt ${{ env.TEMP_REPORT_FILE }} ${{ env.REPORT_FILE }}
+#
+#          echo "${{ needs.test-android.outputs.ubuntu-angular-test-result }}" | awk '{gsub(/;/,"\n"); print;}' > temp/ubuntu-test-result.txt
+#          echo "${{ needs.test-ios.outputs.mac-angular-test-result }}" | awk '{gsub(/;/,"\n"); print;}' > temp/mac-result.txt
+#
+#          paste -d "," temp/ubuntu-test-result.txt temp/mac-result.txt > ${{ env.TEMP_REPORT_FILE }}
+#          awk '{gsub(/,/," | "); print;}' ${{ env.TEMP_REPORT_FILE }} >> ${{ env.REPORT_FILE }}
+#
+#      #      - name: Show file content
+#      #        run: |
+#      #          pwd
+#      #          ls -la
+#      #          cat README.md
+#
+#      #      todo: remove temp and run "tns clean"
+#      #      - - name: Clean temp directory
+#      #          run: rm -rf *
+#      #          working-directory: ./temp
+#
+#      - name: Commit report
+#        run: |
+#          git config --global user.name 'Alex Sinitsa'
+#          git config --global user.email 'j0996602789@gmail.com'
+#          git status
+#          git add .
+#          git remote set-url origin https://x-access-token:${{ secrets.SECRET_GITHUB_TOKEN }}@github.com/${{ github.repository }}
+#          git commit -am "Version update"
+#          git push
+#

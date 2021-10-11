@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import { ExecOptions } from "@actions/exec/lib/interfaces";
 
-import { pluginsList } from "../../plugins-list";
+import { pluginsList, pluginI } from "../../plugins-list";
 
 
 interface PluginVersion {
@@ -29,6 +29,8 @@ class CheckForPluginUpdatesAction {
 
 
   async start() {
+    // todo: add if
+    // todo: get previous test result to a json or csv file
     let foundedNewVersion = false;
 
     try {
@@ -58,7 +60,7 @@ class CheckForPluginUpdatesAction {
         await exec.exec(`npm install -g nativescript@${this.nativescriptVersions[i]} `, [], this.options);
 
         for (let i = 0; i < pluginsList.length; i++) {
-          const pluginName = pluginsList[i];
+          const pluginName = pluginsList[i].name;
           console.log('pluginName ====> ', pluginName);
           this.pluginsVersions[i] = {};
 
@@ -126,27 +128,31 @@ class CheckForPluginUpdatesAction {
 
   async updatePlugins(workingDirectory: string) {
     for (let i = 0; i < pluginsList.length; i++) {
+      const pluginName = pluginsList[i].name;
       const testedVersion = this.pluginsVersions[i].tested;
       const latestVersion = this.pluginsVersions[i].latest;
       let isSuccess = true;
 
       if (latestVersion && testedVersion !== latestVersion) {
         isSuccess = await this.testPlugin(pluginsList[i], latestVersion);
-        await this.uninstallPlugin(pluginsList[i]);
+        await this.uninstallPlugin(pluginName);
       }
 
-      if (!this.testResult[pluginsList[i]]) {
-        this.testResult[pluginsList[i]] = {};
+      // save testing info in this.testResult
+      if (!this.testResult[pluginName]) {
+        this.testResult[pluginName] = {};
       }
 
-      this.testResult[pluginsList[i]].version = latestVersion;
-      this.testResult[pluginsList[i]][workingDirectory] = isSuccess ? '+' : '-';
+      this.testResult[pluginName].version = latestVersion;
+      this.testResult[pluginName][workingDirectory] = isSuccess ? '+' : '-';
     }
   }
 
 
-  async testPlugin(pluginName, version) {
+  async testPlugin(plugin: pluginI, version) {
+    const filePath = `${this.options.cwd}/src/app/app-routing.module.ts`;
     let isSuccess = false;
+
     try {
       this.options.listeners = {
         stdout: (data) => {
@@ -157,20 +163,22 @@ class CheckForPluginUpdatesAction {
           isSuccess = false;
         }
       };
-      await exec.exec('npm install ' + pluginName + '@' + version + ' --save-exact', [], this.options);
+      await exec.exec('npm install ' + plugin.name + '@' + version + ' --save-exact', [], this.options);
+
+      await this.activateDemoModule(plugin);
 
       this.options.listeners = {
         stdout: (data) => {
           isSuccess = true;
         },
         stderr: (data) => {
-          this.myError += '=tns build android=' + data.toString();
+          this.myError += '=tns build=' + data.toString();
           isSuccess = false
         }
       };
-
-      console.log('this.options ====>', this.options);
       await exec.exec(`tns build ${ this.isAndroid ? 'android' : 'ios'}`, [], this.options);
+      // restore default routing
+      await exec.exec(`cat ${filePath}.bkp > ${filePath}`, [], this.options);
 
       return isSuccess;
 
@@ -178,6 +186,21 @@ class CheckForPluginUpdatesAction {
       core.setFailed(error.message);
       return false;
     }
+  }
+
+  async activateDemoModule(plugin: pluginI) {
+    // sed -i'.bkp' -e "s/{ path: 'test', loadChildren: () => import('\.\/plugins\/\.default')\.then((m) => m.DefaultModule) }/o/" ns-7-angular/src/app/app-routing.module.ts
+    // const pluginDemoRoute = `{ path: 'test', loadChildren: () => import('\.\/plugins\/${plugin.folderName}')\.then((m) => m.${plugin.moduleName}) }`;
+    const filePath = `./src/app/app-routing.module.ts`;
+    this.options.listeners = {
+      stderr: (data) => {
+        this.myError += '=change routing=' + data.toString();
+      }
+    };
+    // -i'.bkp' to make a backup
+    await exec.exec(`sed -i'' -e "s/\.default /${plugin.folderName}/" ${filePath}`, [], this.options);
+    await exec.exec(`sed -i'' -e "s/DefaultModule/${plugin.moduleName}/" ${filePath}`, [], this.options);
+    await exec.exec(`cat ${filePath}`, [], this.options);
   }
 
 
@@ -194,11 +217,11 @@ class CheckForPluginUpdatesAction {
   setOutput() {
     let output = '';
 
-    for (const pluginName of pluginsList) {
-      output += this.isAndroid ? pluginName + this.delimiter + this.testResult[pluginName].version + this.delimiter : '';
+    for (const plugin of pluginsList) {
+      output += this.isAndroid ? plugin.name + this.delimiter + this.testResult[plugin.name].version + this.delimiter : '';
 
       for (const workingDirectory of this.workingDirectories) {
-        output += this.testResult[pluginName][workingDirectory] + this.delimiter;
+        output += this.testResult[plugin.name][workingDirectory] + this.delimiter;
       }
       output = output.replace(/[,\s]+$/, ';');
       console.log('output =>', output);
