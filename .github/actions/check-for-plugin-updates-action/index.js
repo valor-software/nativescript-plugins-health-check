@@ -266,7 +266,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                     case 4:
                         _a.sent();
                         filePath = "./src/app/app-routing.module.ts";
-                        return [4 /*yield*/, exec.exec("cat " + filePath + ".bkp >> " + filePath, [], this.options)];
+                        return [4 /*yield*/, exec.exec("cat \"" + filePath + ".bkp\" > " + filePath, [], this.options)];
                     case 5:
                         _a.sent();
                         return [2 /*return*/, isSuccess];
