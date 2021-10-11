@@ -181,7 +181,7 @@ class CheckForPluginUpdatesAction {
       });
       // restore default routing
       const filePath = `./src/app/app-routing.module.ts`;
-      await exec.exec(`cat "${filePath}.bkp" > ${filePath}`, [], this.options);
+      await exec.exec(`cp -f ${filePath}.bkp ${filePath}`, [], this.options);
 
       return isSuccess;
 
