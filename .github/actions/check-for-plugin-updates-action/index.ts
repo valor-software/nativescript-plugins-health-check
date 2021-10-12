@@ -61,7 +61,6 @@ class CheckForPluginUpdatesAction {
 
         for (let i = 0; i < pluginsList.length; i++) {
           const pluginName = pluginsList[i].name;
-          console.log('pluginName ====> ', pluginName);
           this.pluginsVersions[i] = {};
 
           this.options.listeners = {
@@ -227,6 +226,7 @@ class CheckForPluginUpdatesAction {
       }
       output = output.replace(/[,\s]+$/, ';');
       console.log('output =>', output);
+      console.log('All errors =>', this.myError);
     }
 
     core.setOutput('pluginsTestResult', output);

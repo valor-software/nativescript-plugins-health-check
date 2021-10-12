@@ -1,7 +1,7 @@
 import { shareImage, shareText, shareUrl, shareViaFacebook, shareViaTwitter } from '@nativescript/social-share';
 // import { ImageSource } from '@nativescript/core';
 
-export class DemoSharedSocialShare {
+export class SocialShareService {
   testIt() {
     this.doShareText();
   }

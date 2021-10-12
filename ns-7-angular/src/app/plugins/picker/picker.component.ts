@@ -2,9 +2,9 @@ import { Component, NgZone } from '@angular/core';
 
 @Component({
   selector: 'ns-tested',
-  templateUrl: 'tested.component.html',
+  templateUrl: 'picker.component.html',
 })
-export class TestedComponent {
+export class PickerComponent {
 
   constructor(private _ngZone: NgZone) {}
 

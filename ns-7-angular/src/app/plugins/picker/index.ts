@@ -1,1 +1,1 @@
-export * from './tested.module';
+export * from './picker.module';

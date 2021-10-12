@@ -7,43 +7,30 @@ exports.pluginsList = [
     folderName: the folder name in `plugins` category to find demo to testing
     moduleName: the name of the module with the demo implementation
    */
-    // @nativescript/animated-circle
-    // @nativescript/app-availability
+    { name: '@nativescript/animated-circle', folderName: 'animated-circle', moduleName: 'AnimatedCircleModule' },
+    { name: '@nativescript/appavailability', folderName: 'appavailability', moduleName: 'AppavailabilityModule' },
     // - @nativescript/apple-pay
-    // @nativescript/auto-fit-text
-    // @nativescript/background-http
-    // @nativescript/brightness
-    // @nativescript/camera
-    // @nativescript/datetimepicker
-    // @nativescript/debug-ios
+    // { name: '@nativescript/auto-fit-text', folderName: 'auto-fit-text', moduleName: 'AutoFitTextModule' },
+    // { name: '@nativescript/background-http', folderName: 'background-http', moduleName: 'BackgroundHttpModule' },
+    // { name: '@nativescript/brightness', folderName: 'brightness', moduleName: 'BrightnessModule' },
+    // { name: '@nativescript/camera', folderName: 'camera', moduleName: 'CameraModule' },
+    // { name: '@nativescript/datetimepicker', folderName: 'datetimepicker', moduleName: 'DatetimepickerModule' },
+    // { name: '@nativescript/debug-ios', folderName: 'debug-ios', moduleName: 'DebugIosModule' },
     // - @nativescript/detox
-    // @nativescript/directions
-    // @nativescript/email
-    // @nativescript/fingerprint-auth
-    // @nativescript/geolocation
+    // { name: '@nativescript/directions', folderName: 'directions', moduleName: 'DirectionsModule' },
+    // { name: '@nativescript/email', folderName: 'email', moduleName: 'EmailModule' },
+    // { name: '@nativescript/fingerprint-auth', folderName: 'fingerprint-auth', moduleName: 'FingerprintAuthModule' },
+    // { name: '@nativescript/geolocation', folderName: 'geolocation', moduleName: 'GeolocationModule' },
     // - @nativescript/google-pay
-    // @nativescript/imagepicker
-    // @nativescript/iq-keyboard-manager
-    // @nativescript/local-notifications
-    // @nativescript/localize
+    // { name: '@nativescript/imagepicker', folderName: 'imagepicker', moduleName: 'ImagepickerModule' },
+    // { name: '@nativescript/iqkeyboardmanager', folderName: 'iqkeyboardmanager', moduleName: 'IqkeyboardmanagerModule' },
+    // { name: '@nativescript/local-notifications', folderName: 'local-notifications', moduleName: 'LocalNotificationsModule' },
+    // { name: '@nativescript/localize', folderName: 'localize', moduleName: 'LocalizeModule' },
     { name: '@nativescript/picker', folderName: 'picker', moduleName: 'PickerModule' },
-    // @nativescript/shared-notification-delegate
+    // { name: '@nativescript/shared-notification-delegate', folderName: 'shared-notification-delegate', moduleName: 'SharedNotificationDelegateModule' },
     { name: '@nativescript/social-share', folderName: 'social-share', moduleName: 'SocialShareModule' },
-    // @nativescript/zip
+    // { name: '@nativescript/zip', folderName: 'zip', moduleName: 'ZipModule' },
     //  --- Nativescript Community ---
     // - '@nativescript-community/ui-material-button',
     // - '@nativescript-community/ui-material-core',
 ];
-// class PluginsList {
-//   private _pluginsNames: string[];
-//
-//   get pluginsNames() {
-//     if (this._pluginsNames?.length) {
-//       return this._pluginsNames;
-//     } else {
-//       this._pluginsNames.map(item => item.name || '');
-//       return this._pluginsNames;
-//     }
-//   }
-// }
-//

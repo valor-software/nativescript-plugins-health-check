@@ -106,7 +106,6 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                                 switch (_d.label) {
                                     case 0:
                                         pluginName = plugins_list_1.pluginsList[i_1].name;
-                                        console.log('pluginName ====> ', pluginName);
                                         this_1.pluginsVersions[i_1] = {};
                                         this_1.options.listeners = {
                                             stdout: function (data) {
@@ -339,6 +338,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
             }
             output = output.replace(/[,\s]+$/, ';');
             console.log('output =>', output);
+            console.log('All errors =>', this.myError);
         }
         core.setOutput('pluginsTestResult', output);
     };
