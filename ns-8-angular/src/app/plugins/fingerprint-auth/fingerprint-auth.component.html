@@ -1,0 +1,11 @@
+<ActionBar title="fingerprint-auth" class="action-bar"> </ActionBar>
+<StackLayout class="p-20">
+	<ScrollView class="h-full">
+		<StackLayout>
+      <Label [text]="fingerprintAuthService.status" class="t-20 text-center c-black" textWrap="true"></Label>
+			<Button text="Test fingerprint-auth" (tap)="fingerprintAuthService.doCheckAvailable()" class="btn btn-primary"></Button>
+			<Button text="Test Verify" (tap)="fingerprintAuthService.doVerifyFingerprint()" class="btn btn-primary"></Button>
+			<Button text="Test Verify w/ PIN Fallback" (tap)="fingerprintAuthService.doVerifyFingerprintWithCustomFallback()" class="btn btn-primary"></Button>
+		</StackLayout>
+	</ScrollView>
+</StackLayout>

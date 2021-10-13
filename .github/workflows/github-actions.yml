@@ -5,7 +5,7 @@ on:
 #  schedule:
 #    - cron: "0 0 * * *" # run test at the end of every day
 env:
-  projects: "ns-7-angular" #, ns-8-angular" # folder name for each project with its own dependencies
+  projects: "ns-7-angular, ns-8-angular" # folder name for each project with its own dependencies
   nativescript: "7.2.1, 8.1.2" # appropriate nativescript version for each project
   TEMP_REPORT_FILE: "temp/temp-results.txt"
   REPORT_FILE: "PLUGINS_COMPATIBILITY.md"
@@ -30,13 +30,13 @@ jobs:
         with:
           projects-folders: ${{ env.projects }}
           nativescript-versions: ${{ env.nativescript }}
-          is-android: "true"
+          is-android: true
 
       - name: Get plugins test result
         id: ubuntu-angular-test-result
         run: |
           echo "::set-output name=result::${{ steps.testing.outputs.pluginsTestResult }}"
-          echo "::set-output name=result-json::${{ steps.testing.outputs.pluginsTestResultJson }}"
+          echo "::set-output name=result-json::${{ toJSON(steps.testing.outputs.pluginsTestResultJson) }}"
 
   test-ios:
     runs-on: macos-latest
@@ -54,7 +54,7 @@ jobs:
 
       - name: TEST PLUGINS FOR IOS
         id: testing-ios
-        uses: ./.github/actions/check-for-plugin-updates-action/
+        uses: ./.github/actions/test-plugins-action/
         with:
           projects-folders: ${{ env.projects }}
           nativescript-versions: ${{ env.nativescript }}
@@ -69,20 +69,20 @@ jobs:
   save-test-results:
     runs-on: "ubuntu-latest"
     needs: [test-android, test-ios]
-    if: ${{ success() && needs.test-android.outputs.ubuntu-angular-test-result-json }} # todo: check it
+    if: ${{ success() && needs.test-android.outputs.ubuntu-angular-test-result-json && needs.test-ios.outputs.mac-angular-test-result-json }}
     steps:
       - uses: actions/checkout@v2
       - run: |
           echo "${{ needs.test-android.outputs.ubuntu-angular-test-result }}"
-          echo "${{ needs.test-android.outputs.ubuntu-angular-test-result-json }}"
+          echo "${{ toJSON(needs.test-android.outputs.ubuntu-angular-test-result-json) }}"
           echo "${{ needs.test-ios.outputs.mac-angular-test-result }}"
-          echo "${{ needs.test-ios.outputs.mac-angular-test-result-json }}"
+          echo "${{ toJSON(needs.test-ios.outputs.mac-angular-test-result-json) }}"
 
       - name: Save json result to a file
         run: |
           touch reports/${{ env.ANDROID_RESULT_JSON_FILE }} reports/${{ env.IOS_RESULT_JSON_FILE }}
-          echo "${{ needs.test-android.outputs.ubuntu-angular-test-result-json }}" > ${{ env.ANDROID_RESULT_JSON_FILE }}
-          echo "${{ needs.test-ios.outputs.mac-angular-test-result-json }}" > ${{ env.IOS_RESULT_JSON_FILE }}
+          echo "${{ needs.test-android.outputs.ubuntu-angular-test-result-json }}" > reports/${{ env.ANDROID_RESULT_JSON_FILE }}
+          echo "${{ needs.test-ios.outputs.mac-angular-test-result-json }}" > reports/${{ env.IOS_RESULT_JSON_FILE }}
 
       - name: Make a headline for the new report
         run: |
@@ -97,27 +97,16 @@ jobs:
           echo "${{ needs.test-android.outputs.ubuntu-angular-test-result }}" | awk '{gsub(/;/,"\n"); print;}' > temp/ubuntu-test-result.txt
           echo "${{ needs.test-ios.outputs.mac-angular-test-result }}" | awk '{gsub(/;/,"\n"); print;}' > temp/mac-result.txt
 
-          cat temp/ubuntu-test-result.txt
-          cat temp/mac-result.txt
-
           paste -d "," temp/ubuntu-test-result.txt temp/mac-result.txt > ${{ env.TEMP_REPORT_FILE }}
-
-          cat ${{ env.TEMP_REPORT_FILE }}
 
           awk '{gsub(/,/," | "); print;}' ${{ env.TEMP_REPORT_FILE }} >> ${{ env.REPORT_FILE }}
 
-          echo $(date) >> ${{ env.REPORT_FILE }}
+          echo "Last check: $(date)" >> ${{ env.REPORT_FILE }}
 
-      #      - name: Show file content
-      #        run: |
-      #          pwd
-      #          ls -la
-      #          cat README.md
-
-      #      // remove temp and run "tns clean"
-      #       - name: Clean temp directory
-      #          run: rm -rf *
-      #          working-directory: ./temp
+#      // remove temp and run "tns clean"
+#       - name: Clean temp directory
+#          run: rm -rf *
+#          working-directory: ./temp
 
       - name: Commit report
         run: |

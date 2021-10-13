@@ -1,10 +1,10 @@
 {
-  "name": "nativescript-plugins-test",
+  "name": "nativescript-plugins-health-check",
   "version": "1.0.0",
-  "description": "testing of nativescript plugins ",
+  "description": "to health check nativescript plugins",
   "main": "",
   "scripts": {
-    "start": "npm i && tsc -w .github/plugins-list.ts .github/actions/check-for-plugin-updates-action/index.ts"
+    "start": "npm i && tsc -w .github/plugins-list.ts .github/actions/test-plugins-action/index.ts"
   },
   "repository": {
     "type": "git",

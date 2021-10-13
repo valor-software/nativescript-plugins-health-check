@@ -45,7 +45,7 @@ class CheckForPluginUpdatesAction {
 
         this.execOptions.listeners = {
           stderr: (data) => {
-            this.errors += '=install {N} error=' + data.toString();
+            this.errors += '\n=install {N} logs= ' + data.toString();
           }
         };
         await exec.exec(`npm uninstall -g nativescript`, [], this.execOptions);
@@ -83,7 +83,6 @@ class CheckForPluginUpdatesAction {
           await this.checkAllPluginsState(this.projectsFolders[i]);
         } else {
           console.log(`No updates for plugins!`);
-          // todo: check this flow
           return;
         }
       }
@@ -105,7 +104,7 @@ class CheckForPluginUpdatesAction {
         version = match[0];
       },
       stderr: (data) => {
-        this.errors += '=npm info error=' + data.toString();
+        this.errors += '\n=npm info logs= ' + data.toString();
       }
     };
     await exec.exec(`npm info ${pluginName} version`, [], this.execOptions);
@@ -120,21 +119,18 @@ class CheckForPluginUpdatesAction {
     this.execOptions.listeners = {
       stdout: (data) => {
         const output = data.toString();
-        // todo: remove console.log
-        console.log('output ====>', output);
         try {
           pluginsState = JSON.parse(output || '{}');
         } catch (err) {
           pluginsState = {};
         }
-        console.log('this.pluginsState ====>', this.pluginsState);
       },
       stderr: (data) => {
         pluginsState = {};
-        this.errors += '=no json files!=' + data.toString();
+        this.errors += '\n=no json files!= ' + data.toString();
       }
     };
-    await exec.exec(`cat ../reports/${fileWithPreviousTestResult}`, [], {
+    await exec.exec(`cat ./reports/${fileWithPreviousTestResult}`, [], {
       ...this.execOptions,
       ignoreReturnCode: true
     });
@@ -154,7 +150,7 @@ class CheckForPluginUpdatesAction {
         isSuccess = await this.testPlugin(pluginsList[i]);
       }
 
-      this.pluginsState[pluginName][workingDirectory] = isSuccess ? '+' : '-';
+      this.pluginsState[pluginName][workingDirectory] = isSuccess ? '✔' : 'failed';
     }
   }
 
@@ -169,7 +165,7 @@ class CheckForPluginUpdatesAction {
           isSuccess = true;
         },
         stderr: (data) => {
-          this.errors += '=build error=' + data.toString();
+          this.errors += '\n=build logs= ' + data.toString();
           isSuccess = false;
         }
       };
@@ -177,17 +173,16 @@ class CheckForPluginUpdatesAction {
 
       await this.specifyRoutingToPlugin(plugin);
 
-      await exec.exec(`tns build ${ this.isAndroid ? 'android' : 'ios'}`, [], {
-        ...this.execOptions,
-        ignoreReturnCode: true
-      });
+      await exec.exec(`tns build ${ this.isAndroid ? 'android' : 'ios'}`, [], this.execOptions);
 
       await this.removePlugin(plugin.name);
 
       return isSuccess;
 
     } catch (error) {
-      console.log(`Test for plugin ${plugin.name} finished with the error: ====>`, error.message);
+      console.log(`ERROR: Test for plugin ${plugin.name} finished with the error: ====>`, error.message);
+      await this.removePlugin(plugin.name);
+
       return false;
     }
   }
@@ -198,7 +193,7 @@ class CheckForPluginUpdatesAction {
 
     this.execOptions.listeners = {
       stderr: (data) => {
-        this.errors += '=routing change error=' + data.toString();
+        this.errors += '\n=routing change logs= ' + data.toString();
       }
     };
     // -i'.bkp' to make a backup
@@ -209,30 +204,35 @@ class CheckForPluginUpdatesAction {
 
 
   async removePlugin(pluginName: string) {
-    this.execOptions.listeners = {
-      stderr: (data) => {
-        this.errors += '=plugin removing error=' + data.toString();
-      }
-    };
-    await exec.exec('npm uninstall ' + pluginName, [], {
-      ...this.execOptions,
-      ignoreReturnCode: true
-    });
+    try {
+      this.execOptions.listeners = {
+        stderr: (data) => {
+          this.errors += '\n=plugin removing logs= ' + data.toString();
+        }
+      };
+      await exec.exec('npm uninstall ' + pluginName, [], {
+        ...this.execOptions,
+        ignoreReturnCode: true
+      });
 
-    // restore default routing
-    const fileWithRouting = `./src/app/app-routing.module.ts`;
-    await exec.exec(`cp -f ${fileWithRouting}.bkp ${fileWithRouting}`, [], this.execOptions);
+      // restore default routing
+      const fileWithRouting = `./src/app/app-routing.module.ts`;
+      await exec.exec(`cp -f ${fileWithRouting}.bkp ${fileWithRouting}`, [], this.execOptions);
 
-    console.log('ALL PLUGIN ERRORS ====>', this.errors);
-    this.errors = '';
+      console.log('ALL PLUGIN ERRORS ====>', this.errors);
+      this.errors = '';
+    } catch (error) {
+      console.log('ERROR: plugin removing error', error);
+    }
   }
 
 
   async setOutput() {
     let output = '';
-    const jsonOutput = JSON.stringify(this.pluginsState);
+    const jsonOutput = `'` + JSON.stringify(this.pluginsState) + `'`;
 
     for (const plugin of pluginsList) {
+      // put columns with plugin names and plugin versions before the Android test result
       output += this.isAndroid ? plugin.name + this.delimiter + this.pluginsState[plugin.name].latestVersion + this.delimiter : '';
 
       for (const workingDirectory of this.projectsFolders) {
@@ -240,6 +240,7 @@ class CheckForPluginUpdatesAction {
       }
       output = output.replace(/[,\s]+$/, ';');
     }
+    output = output.replace(/[;\s]+$/, '');
 
     core.setOutput('pluginsTestResult', output);
     core.setOutput('pluginsTestResultJson', jsonOutput);
