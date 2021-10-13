@@ -1,7 +1,7 @@
-name: 'Checking for updates for plugins'
-description: 'checking for new versions'
+name: 'Test {N} plugins'
+description: 'Create a build for every NativeScript plugin in the list end return a status report'
 inputs:
-  working-directories:  # id of input
+  projects-folders:
     description: 'Where to run command'
     required: true
     default: './'
@@ -14,10 +14,12 @@ inputs:
     required: false
     default: ''
 outputs:
-  pluginList: # id of output
+  pluginList:
     description: 'String with plugins versions'
   pluginsTestResult:
     description: 'String with a test result'
+  pluginsTestResultJson:
+    description: 'String with a test result (json)'
 runs:
   using: 'node12'
   main: 'index.js'

@@ -7,8 +7,8 @@ exports.pluginsList = [
     folderName: the folder name in `plugins` category to find demo to testing
     moduleName: the name of the module with the demo implementation
    */
-    { name: '@nativescript/animated-circle', folderName: 'animated-circle', moduleName: 'AnimatedCircleModule' },
-    { name: '@nativescript/appavailability', folderName: 'appavailability', moduleName: 'AppavailabilityModule' },
+    // { name: '@nativescript/animated-circle', folderName: 'animated-circle', moduleName: 'AnimatedCircleModule' },
+    // { name: '@nativescript/appavailability', folderName: 'appavailability', moduleName: 'AppavailabilityModule' },
     // - @nativescript/apple-pay
     // { name: '@nativescript/auto-fit-text', folderName: 'auto-fit-text', moduleName: 'AutoFitTextModule' },
     // { name: '@nativescript/background-http', folderName: 'background-http', moduleName: 'BackgroundHttpModule' },
