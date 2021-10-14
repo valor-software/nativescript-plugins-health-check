@@ -2,8 +2,8 @@ name: Github-actions
 on:
   push:
   pull_request:
-#  schedule:
-#    - cron: "0 0 * * *" # run test at the end of every day
+  schedule:
+    - cron: "0 0 * * *" # run test at the end of every day
 env:
   projects: "ns-7-angular, ns-8-angular" # folder name for each project with its own dependencies
   nativescript: "7.2.1, 8.1.2" # appropriate nativescript version for each project
@@ -63,20 +63,20 @@ jobs:
         id: mac-angular-test-result
         run: |
           echo "::set-output name=result::${{ steps.testing-ios.outputs.pluginsTestResult }}"
-          echo "::set-output name=result-json::${{ steps.testing-ios.outputs.pluginsTestResultJson }}"
+          echo "::set-output name=result-json::${{ toJSON(steps.testing-ios.outputs.pluginsTestResultJson) }}"
 
 
   save-test-results:
     runs-on: "ubuntu-latest"
     needs: [test-android, test-ios]
-    if: ${{ success() && needs.test-android.outputs.ubuntu-angular-test-result-json && needs.test-ios.outputs.mac-angular-test-result-json }}
+    if: ${{ success() && needs.test-android.outputs.ubuntu-angular-test-result && needs.test-ios.outputs.mac-angular-test-result }}
     steps:
       - uses: actions/checkout@v2
       - run: |
           echo "${{ needs.test-android.outputs.ubuntu-angular-test-result }}"
-          echo "${{ toJSON(needs.test-android.outputs.ubuntu-angular-test-result-json) }}"
+          echo "${{ needs.test-android.outputs.ubuntu-angular-test-result-json }}"
           echo "${{ needs.test-ios.outputs.mac-angular-test-result }}"
-          echo "${{ toJSON(needs.test-ios.outputs.mac-angular-test-result-json) }}"
+          echo "${{ needs.test-ios.outputs.mac-angular-test-result-json }}"
 
       - name: Save json result to a file
         run: |
@@ -117,4 +117,3 @@ jobs:
           git remote set-url origin https://x-access-token:${{ secrets.SECRET_GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git commit -am "Version update"
           git push
-
