@@ -20,4 +20,4 @@
 @nativescript/shared-notification-delegate |  1.0.2 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/social-share |  2.0.4 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/zip |  5.0.0 |  ✔ |  ✔ | ✔ |  ✔
-Last check: Thu Oct 14 14:12:07 UTC 2021
+Last check: Thu Oct 14 16:17:40 UTC 2021
