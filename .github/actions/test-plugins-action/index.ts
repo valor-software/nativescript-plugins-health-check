@@ -63,16 +63,14 @@ class TestPluginsAction {
             this.pluginsState[pluginName] = {}
           }
 
-          const testedVersion = this.pluginsState[pluginName].latestVersion || '';
+          const testedVersion = this.pluginsState[pluginName].testedVersion || '';
           const latestVersion = await this.getLatestPluginVersion(pluginName);
+          this.pluginsState[pluginName].latestVersion = latestVersion;
 
           if (!latestVersion) {
             core.setFailed('Failed to get a plugin version for ' + pluginName + ' ! Check plugin name, please.');
             return;
           }
-
-          this.pluginsState[pluginName].testedVersion = testedVersion;
-          this.pluginsState[pluginName].latestVersion = latestVersion;
 
           if (testedVersion !== latestVersion) {
             foundedNewVersions = true
@@ -87,10 +85,19 @@ class TestPluginsAction {
         }
       }
 
+      this.removeTestedVersionProperty();
+
       await this.setOutput();
 
     } catch (error) {
       core.setFailed(error.message);
+    }
+  }
+
+  removeTestedVersionProperty() {
+    for (const plugin in this.pluginsState) {
+      this.pluginsState[plugin].testedVersion = this.pluginsState[plugin].latestVersion;
+      delete this.pluginsState[plugin].latestVersion;
     }
   }
 
@@ -142,7 +149,7 @@ class TestPluginsAction {
   async checkAllPluginsState(workingDirectory: string) {
     for (let i = 0; i < pluginsList.length; i++) {
       const pluginName = pluginsList[i].name;
-      const testedVersion = this.pluginsState[pluginName].testedVersion;
+      const testedVersion = this.pluginsState[pluginName].testedVersion || '';
       const latestVersion = this.pluginsState[pluginName].latestVersion;
 
       if (latestVersion && testedVersion !== latestVersion) {
@@ -173,13 +180,13 @@ class TestPluginsAction {
 
       await exec.exec(`tns build ${ this.isAndroid ? 'android' : 'ios'}`, [], this.execOptions);
 
-      await this.removePlugin(plugin.name);
+      await this.clean(plugin.name);
 
       return isSuccess;
 
     } catch (error) {
       console.log(`ERROR: Test for plugin ${plugin.name} finished with the error: ====>`, error.message);
-      await this.removePlugin(plugin.name);
+      await this.clean(plugin.name);
 
       return false;
     }
@@ -201,7 +208,7 @@ class TestPluginsAction {
   }
 
 
-  async removePlugin(pluginName: string) {
+  async clean(pluginName: string) {
     try {
       this.execOptions.listeners = {
         stderr: (data) => {
@@ -212,6 +219,7 @@ class TestPluginsAction {
         ...this.execOptions,
         ignoreReturnCode: true
       });
+      await exec.exec('rm -rf platforms', [], this.execOptions);
 
       // restore default routing
       const fileWithRouting = `./src/app/app-routing.module.ts`;
@@ -232,7 +240,7 @@ class TestPluginsAction {
 
     for (const plugin of pluginsList) {
       // put plugin names column and plugin versions column before the Android test result
-      output += this.isAndroid ? plugin.name + this.delimiter + this.pluginsState[plugin.name].latestVersion + this.delimiter : '';
+      output += this.isAndroid ? plugin.name + this.delimiter + this.pluginsState[plugin.name].testedVersion + this.delimiter : '';
 
       for (const workingDirectory of this.projectsFolders) {
         output += this.pluginsState[plugin.name][workingDirectory] + this.delimiter;

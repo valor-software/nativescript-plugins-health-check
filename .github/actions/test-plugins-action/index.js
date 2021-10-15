@@ -115,16 +115,15 @@ var TestPluginsAction = /** @class */ (function () {
                         if (!this.pluginsState[pluginName]) {
                             this.pluginsState[pluginName] = {};
                         }
-                        testedVersion = this.pluginsState[pluginName].latestVersion || '';
+                        testedVersion = this.pluginsState[pluginName].testedVersion || '';
                         return [4 /*yield*/, this.getLatestPluginVersion(pluginName)];
                     case 7:
                         latestVersion = _b.sent();
+                        this.pluginsState[pluginName].latestVersion = latestVersion;
                         if (!latestVersion) {
                             core.setFailed('Failed to get a plugin version for ' + pluginName + ' ! Check plugin name, please.');
                             return [2 /*return*/];
                         }
-                        this.pluginsState[pluginName].testedVersion = testedVersion;
-                        this.pluginsState[pluginName].latestVersion = latestVersion;
                         if (testedVersion !== latestVersion) {
                             foundedNewVersions = true;
                         }
@@ -144,7 +143,9 @@ var TestPluginsAction = /** @class */ (function () {
                     case 12:
                         i++;
                         return [3 /*break*/, 3];
-                    case 13: return [4 /*yield*/, this.setOutput()];
+                    case 13:
+                        this.removeTestedVersionProperty();
+                        return [4 /*yield*/, this.setOutput()];
                     case 14:
                         _b.sent();
                         return [3 /*break*/, 16];
@@ -156,6 +157,12 @@ var TestPluginsAction = /** @class */ (function () {
                 }
             });
         });
+    };
+    TestPluginsAction.prototype.removeTestedVersionProperty = function () {
+        for (var plugin in this.pluginsState) {
+            this.pluginsState[plugin].testedVersion = this.pluginsState[plugin].latestVersion;
+            delete this.pluginsState[plugin].latestVersion;
+        }
     };
     TestPluginsAction.prototype.getLatestPluginVersion = function (pluginName) {
         return __awaiter(this, void 0, void 0, function () {
@@ -226,7 +233,7 @@ var TestPluginsAction = /** @class */ (function () {
                     case 1:
                         if (!(i < plugins_list_1.pluginsList.length)) return [3 /*break*/, 4];
                         pluginName = plugins_list_1.pluginsList[i].name;
-                        testedVersion = this.pluginsState[pluginName].testedVersion;
+                        testedVersion = this.pluginsState[pluginName].testedVersion || '';
                         latestVersion = this.pluginsState[pluginName].latestVersion;
                         if (!(latestVersion && testedVersion !== latestVersion)) return [3 /*break*/, 3];
                         return [4 /*yield*/, this.testPlugin(plugins_list_1.pluginsList[i])];
@@ -272,14 +279,14 @@ var TestPluginsAction = /** @class */ (function () {
                         return [4 /*yield*/, exec.exec("tns build " + (this.isAndroid ? 'android' : 'ios'), [], this.execOptions)];
                     case 4:
                         _a.sent();
-                        return [4 /*yield*/, this.removePlugin(plugin.name)];
+                        return [4 /*yield*/, this.clean(plugin.name)];
                     case 5:
                         _a.sent();
                         return [2 /*return*/, isSuccess];
                     case 6:
                         error_2 = _a.sent();
                         console.log("ERROR: Test for plugin " + plugin.name + " finished with the error: ====>", error_2.message);
-                        return [4 /*yield*/, this.removePlugin(plugin.name)];
+                        return [4 /*yield*/, this.clean(plugin.name)];
                     case 7:
                         _a.sent();
                         return [2 /*return*/, false];
@@ -314,14 +321,14 @@ var TestPluginsAction = /** @class */ (function () {
             });
         });
     };
-    TestPluginsAction.prototype.removePlugin = function (pluginName) {
+    TestPluginsAction.prototype.clean = function (pluginName) {
         return __awaiter(this, void 0, void 0, function () {
             var fileWithRouting, error_3;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
+                        _a.trys.push([0, 4, , 5]);
                         this.execOptions.listeners = {
                             stderr: function (data) {
                                 _this.errors += '\n=plugin removing logs= ' + data.toString();
@@ -330,18 +337,21 @@ var TestPluginsAction = /** @class */ (function () {
                         return [4 /*yield*/, exec.exec('npm uninstall ' + pluginName, [], __assign(__assign({}, this.execOptions), { ignoreReturnCode: true }))];
                     case 1:
                         _a.sent();
+                        return [4 /*yield*/, exec.exec('rm -rf platforms', [], this.execOptions)];
+                    case 2:
+                        _a.sent();
                         fileWithRouting = "./src/app/app-routing.module.ts";
                         return [4 /*yield*/, exec.exec("cp -f " + fileWithRouting + ".bkp " + fileWithRouting, [], this.execOptions)];
-                    case 2:
+                    case 3:
                         _a.sent();
                         console.log('ALL PLUGIN ERRORS ====>', this.errors);
                         this.errors = '';
-                        return [3 /*break*/, 4];
-                    case 3:
+                        return [3 /*break*/, 5];
+                    case 4:
                         error_3 = _a.sent();
                         console.log('ERROR: plugin removing error', error_3);
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
+                        return [3 /*break*/, 5];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
@@ -355,7 +365,7 @@ var TestPluginsAction = /** @class */ (function () {
                 for (_i = 0, pluginsList_1 = plugins_list_1.pluginsList; _i < pluginsList_1.length; _i++) {
                     plugin = pluginsList_1[_i];
                     // put plugin names column and plugin versions column before the Android test result
-                    output += this.isAndroid ? plugin.name + this.delimiter + this.pluginsState[plugin.name].latestVersion + this.delimiter : '';
+                    output += this.isAndroid ? plugin.name + this.delimiter + this.pluginsState[plugin.name].testedVersion + this.delimiter : '';
                     for (_a = 0, _b = this.projectsFolders; _a < _b.length; _a++) {
                         workingDirectory = _b[_a];
                         output += this.pluginsState[plugin.name][workingDirectory] + this.delimiter;

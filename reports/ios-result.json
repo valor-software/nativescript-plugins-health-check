@@ -1,0 +1,22 @@
+{
+  "@nativescript/shared-notification-delegate": {
+    "ns-7-angular": "✔",
+    "ns-8-angular": "✔",
+    "testedVersion": "1.0.2"
+  },
+  "@nativescript/localize": {
+    "ns-7-angular": "✔",
+    "ns-8-angular": "✔",
+    "testedVersion": "5.0.4"
+  },
+  "@nativescript/picker": {
+    "ns-7-angular": "✔",
+    "ns-8-angular": "✔",
+    "testedVersion": "4.0.1"
+  },
+  "@nativescript/local-notifications": {
+    "ns-7-angular": "✔",
+    "ns-8-angular": "✔",
+    "testedVersion": "5.0.3"
+  }
+}
