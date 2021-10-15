@@ -1,10 +1,11 @@
 
 # What is this project for?
 
-This project is run once a day by a github action to find new versions
-of NativeScript plugins and make a builds with them to check if they work.
+The purpose of this project is to check the health of the NativeScript plugins
+added to this project for testing. Github use actions to run this project once a day
+to find the latest plugin versions and make a builds with them to check if they work.
 
-You can find the health of the plugins build at the following file:
+You can find the result of the plugins build at the following file:
 
 **[PLUGINS_COMPATIBILITY.md](PLUGINS_COMPATIBILITY.md)**
 
