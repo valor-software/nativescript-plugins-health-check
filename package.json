@@ -1,14 +1,14 @@
 {
   "name": "nativescript-plugins-health-check",
   "version": "1.0.0",
-  "description": "to health check nativescript plugins",
+  "description": "To check the health of nativescript plugins",
   "main": "",
   "scripts": {
     "start": "npm i && tsc -w .github/plugins-list.ts .github/actions/test-plugins-action/index.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlexanderSinitsa/NativeScript-plugins-test.git"
+    "url": "git+https://github.com/valor-software/nativescript-plugins-health-check.git"
   },
   "keywords": [
     "nativescript",
@@ -20,9 +20,9 @@
   "author": "Alexander Sinitsa",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/AlexanderSinitsa/NativeScript-plugins-test/issues"
+    "url": "https://github.com/valor-software/nativescript-plugins-health-check/issues"
   },
-  "homepage": "https://github.com/AlexanderSinitsa/NativeScript-plugins-test#readme",
+  "homepage": "https://github.com/valor-software/nativescript-plugins-health-check#readme",
   "devDependencies": {
     "@actions/core": "^1.6.0",
     "@actions/exec": "^1.1.0",
