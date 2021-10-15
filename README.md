@@ -1,5 +1,5 @@
 
-### What is this project for?
+# What is this project for?
 
 This project is run once a day by a github action to find new versions
 of NativeScript plugins and make a builds with them to check if they work.
@@ -9,7 +9,7 @@ You can find the health of the plugins build at the following file:
 **[PLUGINS_COMPATIBILITY.md](PLUGINS_COMPATIBILITY.md)**
 
 
-### How does it fork?
+## How does it fork?
 
 Currently, this workspace contains several projects with own dependencies,
 for which [plugins](.github/plugins-list.ts) are installed and builds are created
@@ -34,11 +34,10 @@ in the `report` folder (*.json format). Json files keep the latest tested
 version and status for all plugins. If a plugin with a new version is released,
 a build will be created to check this version.
 
-### How to add a new plugin check?
+## How to add a new plugin check?
 ```
 npm start
 ```
 
 For each project, create an angular module which should use the new plugin.
 Then add the appropriate line to the [plugins-list.ts](.github/plugins-list.ts).
-

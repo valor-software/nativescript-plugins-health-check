@@ -50,10 +50,10 @@ exports.__esModule = true;
 var core = require("@actions/core");
 var exec = require("@actions/exec");
 var plugins_list_1 = require("../../plugins-list");
-var CheckForPluginUpdatesAction = /** @class */ (function () {
-    function CheckForPluginUpdatesAction() {
-        this.ANDROID_RESULT_JSON_FILE = "android-result.json";
-        this.IOS_RESULT_JSON_FILE = "ios-result.json";
+var TestPluginsAction = /** @class */ (function () {
+    function TestPluginsAction() {
+        this.ANDROID_RESULT_JSON_FILE = "./reports/android-result.json";
+        this.IOS_RESULT_JSON_FILE = "./reports/ios-result.json";
         this.delimiter = ', ';
         this.errors = '';
         this.execOptions = {};
@@ -61,7 +61,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
         this.projectsFolders = [];
         this.isAndroid = false;
     }
-    CheckForPluginUpdatesAction.prototype.start = function () {
+    TestPluginsAction.prototype.start = function () {
         return __awaiter(this, void 0, void 0, function () {
             var foundedNewVersions, nativescriptVersions, _a, i, i_1, pluginName, testedVersion, latestVersion, error_1;
             var _this = this;
@@ -119,12 +119,12 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                         return [4 /*yield*/, this.getLatestPluginVersion(pluginName)];
                     case 7:
                         latestVersion = _b.sent();
-                        this.pluginsState[pluginName].testedVersion = testedVersion;
-                        this.pluginsState[pluginName].latestVersion = latestVersion;
                         if (!latestVersion) {
                             core.setFailed('Failed to get a plugin version for ' + pluginName + ' ! Check plugin name, please.');
                             return [2 /*return*/];
                         }
+                        this.pluginsState[pluginName].testedVersion = testedVersion;
+                        this.pluginsState[pluginName].latestVersion = latestVersion;
                         if (testedVersion !== latestVersion) {
                             foundedNewVersions = true;
                         }
@@ -157,7 +157,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
             });
         });
     };
-    CheckForPluginUpdatesAction.prototype.getLatestPluginVersion = function (pluginName) {
+    TestPluginsAction.prototype.getLatestPluginVersion = function (pluginName) {
         return __awaiter(this, void 0, void 0, function () {
             var version;
             var _this = this;
@@ -183,7 +183,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
             });
         });
     };
-    CheckForPluginUpdatesAction.prototype.getOldPluginsStateFromFile = function () {
+    TestPluginsAction.prototype.getOldPluginsStateFromFile = function () {
         return __awaiter(this, void 0, void 0, function () {
             var fileWithPreviousTestResult, pluginsState;
             var _this = this;
@@ -207,7 +207,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                                 _this.errors += '\n=no json files!= ' + data.toString();
                             }
                         };
-                        return [4 /*yield*/, exec.exec("cat ./reports/" + fileWithPreviousTestResult, [], __assign(__assign({}, this.execOptions), { ignoreReturnCode: true }))];
+                        return [4 /*yield*/, exec.exec("cat " + fileWithPreviousTestResult, [], __assign(__assign({}, this.execOptions), { ignoreReturnCode: true }))];
                     case 1:
                         _a.sent();
                         return [2 /*return*/, pluginsState];
@@ -215,7 +215,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
             });
         });
     };
-    CheckForPluginUpdatesAction.prototype.checkAllPluginsState = function (workingDirectory) {
+    TestPluginsAction.prototype.checkAllPluginsState = function (workingDirectory) {
         return __awaiter(this, void 0, void 0, function () {
             var i, pluginName, testedVersion, latestVersion, isSuccess;
             return __generator(this, function (_a) {
@@ -224,28 +224,25 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                         i = 0;
                         _a.label = 1;
                     case 1:
-                        if (!(i < plugins_list_1.pluginsList.length)) return [3 /*break*/, 5];
+                        if (!(i < plugins_list_1.pluginsList.length)) return [3 /*break*/, 4];
                         pluginName = plugins_list_1.pluginsList[i].name;
                         testedVersion = this.pluginsState[pluginName].testedVersion;
                         latestVersion = this.pluginsState[pluginName].latestVersion;
-                        isSuccess = true;
                         if (!(latestVersion && testedVersion !== latestVersion)) return [3 /*break*/, 3];
                         return [4 /*yield*/, this.testPlugin(plugins_list_1.pluginsList[i])];
                     case 2:
                         isSuccess = _a.sent();
+                        this.pluginsState[pluginName][workingDirectory] = isSuccess ? '✔' : 'failed';
                         _a.label = 3;
                     case 3:
-                        this.pluginsState[pluginName][workingDirectory] = isSuccess ? '✔' : 'failed';
-                        _a.label = 4;
-                    case 4:
                         i++;
                         return [3 /*break*/, 1];
-                    case 5: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    CheckForPluginUpdatesAction.prototype.testPlugin = function (plugin) {
+    TestPluginsAction.prototype.testPlugin = function (plugin) {
         return __awaiter(this, void 0, void 0, function () {
             var isSuccess, version, error_2;
             var _this = this;
@@ -291,7 +288,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
             });
         });
     };
-    CheckForPluginUpdatesAction.prototype.specifyRoutingToPlugin = function (plugin) {
+    TestPluginsAction.prototype.specifyRoutingToPlugin = function (plugin) {
         return __awaiter(this, void 0, void 0, function () {
             var fileWithRouting;
             var _this = this;
@@ -317,7 +314,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
             });
         });
     };
-    CheckForPluginUpdatesAction.prototype.removePlugin = function (pluginName) {
+    TestPluginsAction.prototype.removePlugin = function (pluginName) {
         return __awaiter(this, void 0, void 0, function () {
             var fileWithRouting, error_3;
             var _this = this;
@@ -349,7 +346,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
             });
         });
     };
-    CheckForPluginUpdatesAction.prototype.setOutput = function () {
+    TestPluginsAction.prototype.setOutput = function () {
         return __awaiter(this, void 0, void 0, function () {
             var output, jsonOutput, _i, pluginsList_1, plugin, _a, _b, workingDirectory;
             return __generator(this, function (_c) {
@@ -357,7 +354,7 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
                 jsonOutput = "'" + JSON.stringify(this.pluginsState) + "'";
                 for (_i = 0, pluginsList_1 = plugins_list_1.pluginsList; _i < pluginsList_1.length; _i++) {
                     plugin = pluginsList_1[_i];
-                    // put columns with plugin names and plugin versions before the Android test result
+                    // put plugin names column and plugin versions column before the Android test result
                     output += this.isAndroid ? plugin.name + this.delimiter + this.pluginsState[plugin.name].latestVersion + this.delimiter : '';
                     for (_a = 0, _b = this.projectsFolders; _a < _b.length; _a++) {
                         workingDirectory = _b[_a];
@@ -372,6 +369,6 @@ var CheckForPluginUpdatesAction = /** @class */ (function () {
             });
         });
     };
-    return CheckForPluginUpdatesAction;
+    return TestPluginsAction;
 }());
-(new CheckForPluginUpdatesAction()).start();
+(new TestPluginsAction()).start();

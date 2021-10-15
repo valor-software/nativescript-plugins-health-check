@@ -10,9 +10,9 @@ interface PluginStateI {
   [key: string]: string // { [project (folder name)]: +/- [test_result]
 }
 
-class CheckForPluginUpdatesAction {
-  ANDROID_RESULT_JSON_FILE = "android-result.json";
-  IOS_RESULT_JSON_FILE = "ios-result.json";
+class TestPluginsAction {
+  ANDROID_RESULT_JSON_FILE = "./reports/android-result.json";
+  IOS_RESULT_JSON_FILE = "./reports/ios-result.json";
   delimiter = ', ';
   errors = '';
   execOptions: ExecOptions = {};
@@ -66,13 +66,13 @@ class CheckForPluginUpdatesAction {
           const testedVersion = this.pluginsState[pluginName].latestVersion || '';
           const latestVersion = await this.getLatestPluginVersion(pluginName);
 
-          this.pluginsState[pluginName].testedVersion = testedVersion;
-          this.pluginsState[pluginName].latestVersion = latestVersion;
-
           if (!latestVersion) {
             core.setFailed('Failed to get a plugin version for ' + pluginName + ' ! Check plugin name, please.');
             return;
           }
+
+          this.pluginsState[pluginName].testedVersion = testedVersion;
+          this.pluginsState[pluginName].latestVersion = latestVersion;
 
           if (testedVersion !== latestVersion) {
             foundedNewVersions = true
@@ -130,7 +130,7 @@ class CheckForPluginUpdatesAction {
         this.errors += '\n=no json files!= ' + data.toString();
       }
     };
-    await exec.exec(`cat ./reports/${fileWithPreviousTestResult}`, [], {
+    await exec.exec(`cat ${fileWithPreviousTestResult}`, [], {
       ...this.execOptions,
       ignoreReturnCode: true
     });
@@ -144,13 +144,11 @@ class CheckForPluginUpdatesAction {
       const pluginName = pluginsList[i].name;
       const testedVersion = this.pluginsState[pluginName].testedVersion;
       const latestVersion = this.pluginsState[pluginName].latestVersion;
-      let isSuccess = true;
 
       if (latestVersion && testedVersion !== latestVersion) {
-        isSuccess = await this.testPlugin(pluginsList[i]);
+        const isSuccess = await this.testPlugin(pluginsList[i]);
+        this.pluginsState[pluginName][workingDirectory] = isSuccess ? '✔' : 'failed';
       }
-
-      this.pluginsState[pluginName][workingDirectory] = isSuccess ? '✔' : 'failed';
     }
   }
 
@@ -221,6 +219,7 @@ class CheckForPluginUpdatesAction {
 
       console.log('ALL PLUGIN ERRORS ====>', this.errors);
       this.errors = '';
+
     } catch (error) {
       console.log('ERROR: plugin removing error', error);
     }
@@ -232,7 +231,7 @@ class CheckForPluginUpdatesAction {
     const jsonOutput = `'` + JSON.stringify(this.pluginsState) + `'`;
 
     for (const plugin of pluginsList) {
-      // put columns with plugin names and plugin versions before the Android test result
+      // put plugin names column and plugin versions column before the Android test result
       output += this.isAndroid ? plugin.name + this.delimiter + this.pluginsState[plugin.name].latestVersion + this.delimiter : '';
 
       for (const workingDirectory of this.projectsFolders) {
@@ -247,4 +246,4 @@ class CheckForPluginUpdatesAction {
   }
 }
 
-(new CheckForPluginUpdatesAction()).start();
+(new TestPluginsAction()).start();
