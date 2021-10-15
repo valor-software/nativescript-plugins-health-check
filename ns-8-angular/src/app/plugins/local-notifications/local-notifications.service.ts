@@ -1,5 +1,4 @@
 import { Color } from '@nativescript/core';
-import * as localNotifications from '@nativescript/local-notifications';
 import { LocalNotifications, ScheduleOptions } from '@nativescript/local-notifications';
 import { DemoBase } from "../../utils";
 

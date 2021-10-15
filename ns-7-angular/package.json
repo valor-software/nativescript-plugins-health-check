@@ -20,7 +20,6 @@
     "url": "https://github.com/NativeScript/NativeScript/issues"
   },
   "dependencies": {
-    "@actions/github": "^5.0.0",
     "@angular/animations": "~11.2.0",
     "@angular/common": "~11.2.0",
     "@angular/compiler": "~11.2.0",
