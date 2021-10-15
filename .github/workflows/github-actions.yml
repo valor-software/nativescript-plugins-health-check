@@ -52,7 +52,7 @@ jobs:
       - run: python -m pip install six
       - run: npm i
 
-      - name: TEST PLUGINS FOR IOS
+      - name: TEST PLUGINS
         id: testing-ios
         uses: ./.github/actions/test-plugins-action/
         with:
@@ -78,19 +78,23 @@ jobs:
           echo "${{ needs.test-ios.outputs.mac-angular-test-result }}"
           echo "${{ needs.test-ios.outputs.mac-angular-test-result-json }}"
 
-      - name: Save json result to a file
+      - name: Save result json to a file
         run: |
           touch reports/${{ env.ANDROID_RESULT_JSON_FILE }} reports/${{ env.IOS_RESULT_JSON_FILE }}
           echo "${{ needs.test-android.outputs.ubuntu-angular-test-result-json }}" > reports/${{ env.ANDROID_RESULT_JSON_FILE }}
           echo "${{ needs.test-ios.outputs.mac-angular-test-result-json }}" > reports/${{ env.IOS_RESULT_JSON_FILE }}
 
-      - name: Make a headline for the new report
+      - name: Make a headline for the the report
         run: |
           echo ${{ env.REPORT_FILE }}
           echo "| Plugin | Version | android {N}7  | android {N}8 | iOS {N}7 | iOS {N}8 |"> ${{ env.REPORT_FILE }}
           echo "| --- | :---: | :---: | :---: | :---: | :---: |" >> ${{ env.REPORT_FILE }}
 
-      - name: Make a table to keep it in ${{ env.REPORT_FILE }}
+      - name: Create a table of test result to save it ${{ env.REPORT_FILE }}
+        # create empty files
+        # convert string to columns of data
+        # merge result columns from ubuntu and mac
+        # replace `,` with ` | ` to get a nice table in the ${{ env.REPORT_FILE }}
         run: |
           mkdir temp && touch temp/ubuntu-test-result.txt temp/mac-result.txt ${{ env.TEMP_REPORT_FILE }} ${{ env.REPORT_FILE }}
 
@@ -101,6 +105,8 @@ jobs:
 
           awk '{gsub(/,/," | "); print;}' ${{ env.TEMP_REPORT_FILE }} >> ${{ env.REPORT_FILE }}
 
+      - name: Add current date to report
+        run: |
           echo "Last check: $(date)" >> ${{ env.REPORT_FILE }}
 
 #      // remove temp and run "tns clean"
@@ -111,9 +117,9 @@ jobs:
       - name: Commit report
         run: |
           git config --global user.name 'Alex Sinitsa'
-          git config --global user.email 'j0996602789@gmail.com'
+          git config --global user.email 'alexander.sinitsa@valor-software.com'
           git status
           git add .
           git remote set-url origin https://x-access-token:${{ secrets.SECRET_GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git commit -am "Version update"
+          git commit -am "Check plugins (generated)"
           git push
