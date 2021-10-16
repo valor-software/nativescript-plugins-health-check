@@ -328,7 +328,7 @@ var TestPluginsAction = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 4, , 5]);
+                        _a.trys.push([0, 3, , 4]);
                         this.execOptions.listeners = {
                             stderr: function (data) {
                                 _this.errors += '\n=plugin removing logs= ' + data.toString();
@@ -337,21 +337,18 @@ var TestPluginsAction = /** @class */ (function () {
                         return [4 /*yield*/, exec.exec('npm uninstall ' + pluginName, [], __assign(__assign({}, this.execOptions), { ignoreReturnCode: true }))];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, exec.exec('rm -rf platforms', [], this.execOptions)];
-                    case 2:
-                        _a.sent();
                         fileWithRouting = "./src/app/app-routing.module.ts";
                         return [4 /*yield*/, exec.exec("cp -f " + fileWithRouting + ".bkp " + fileWithRouting, [], this.execOptions)];
-                    case 3:
+                    case 2:
                         _a.sent();
                         console.log('ALL PLUGIN ERRORS ====>', this.errors);
                         this.errors = '';
-                        return [3 /*break*/, 5];
-                    case 4:
+                        return [3 /*break*/, 4];
+                    case 3:
                         error_3 = _a.sent();
                         console.log('ERROR: plugin removing error', error_3);
-                        return [3 /*break*/, 5];
-                    case 5: return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
                 }
             });
         });

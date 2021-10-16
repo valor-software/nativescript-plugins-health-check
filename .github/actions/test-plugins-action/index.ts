@@ -219,7 +219,7 @@ class TestPluginsAction {
         ...this.execOptions,
         ignoreReturnCode: true
       });
-      await exec.exec('rm -rf platforms', [], this.execOptions);
+      // await exec.exec('ns clean', [], this.execOptions);
 
       // restore default routing
       const fileWithRouting = `./src/app/app-routing.module.ts`;
