@@ -105,10 +105,6 @@ jobs:
 
           awk '{gsub(/,/," | "); print;}' ${{ env.TEMP_REPORT_FILE }} >> ${{ env.REPORT_FILE }}
 
-      - name: Add current date to report
-        run: |
-          echo "Last check: $(date)" >> ${{ env.REPORT_FILE }}
-
 #      // remove temp and run "tns clean"
 #       - name: Clean temp directory
 #          run: rm -rf *
