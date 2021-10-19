@@ -1,4 +1,5 @@
 import { Component, NgZone } from '@angular/core';
+import { PickerService } from "./picker.service";
 
 @Component({
   selector: 'ns-tested',
@@ -6,8 +7,9 @@ import { Component, NgZone } from '@angular/core';
 })
 export class PickerComponent {
 
-  constructor(private _ngZone: NgZone) {}
+  constructor(private _ngZone: NgZone, public pickerService: PickerService) {}
 
   ngOnInit() {
+    this.pickerService.observableDataItems = this.pickerService.getDataItems(20);
   }
 }

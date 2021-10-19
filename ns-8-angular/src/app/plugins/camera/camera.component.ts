@@ -8,7 +8,7 @@ import { DemoBase } from "../../utils";
 	selector: 'demo-camera',
 	templateUrl: 'camera.component.html',
 })
-export class CameraComponent extends DemoBase { // ??????
+export class CameraComponent extends DemoBase {
   picturePath: string;
   cameraImage: any;
   saveToGallery: false;

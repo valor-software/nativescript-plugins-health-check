@@ -1,5 +1,4 @@
 import { Component, NgZone } from '@angular/core';
-import { } from '@nativescript/auto-fit-text';
 
 @Component({
 	selector: 'demo-auto-fit-text',
