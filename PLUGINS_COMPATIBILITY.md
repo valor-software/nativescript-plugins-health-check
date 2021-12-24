@@ -11,7 +11,7 @@
 @nativescript/directions |  2.0.1 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/email |  2.0.5 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/fingerprint-auth |  8.1.0 |  ✔ |  ✔ | ✔ |  ✔
-@nativescript/geolocation |  8.0.1 |  ✔ |  ✔ | ✔ |  ✔
+@nativescript/geolocation |  8.0.2 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/imagepicker |  1.0.6 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/iqkeyboardmanager |  2.0.0 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/local-notifications |  5.0.3 |  ✔ |  ✔ | ✔ |  ✔
