@@ -2,7 +2,7 @@
 | --- | :---: | :---: | :---: | :---: | :---: |
 @nativescript/animated-circle |  1.1.7 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/appavailability |  2.0.0 |  ✔ |  ✔ | ✔ |  ✔
-@nativescript/auto-fit-text |  1.0.1 |  ✔ |  ✔ | ✔ |  ✔
+@nativescript/auto-fit-text |  1.0.2 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/background-http |  5.0.2 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/brightness |  2.0.0 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/camera |  5.0.10 |  ✔ |  ✔ | ✔ |  ✔
