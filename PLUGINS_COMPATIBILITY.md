@@ -14,7 +14,7 @@
 @nativescript/geolocation |  8.0.2 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/imagepicker |  1.0.6 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/iqkeyboardmanager |  2.0.0 |  ✔ |  ✔ | ✔ |  ✔
-@nativescript/local-notifications |  5.0.3 |  ✔ |  ✔ | ✔ |  ✔
+@nativescript/local-notifications |  5.0.4 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/localize |  5.0.4 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/picker |  4.0.1 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/shared-notification-delegate |  1.0.2 |  ✔ |  ✔ | ✔ |  ✔
