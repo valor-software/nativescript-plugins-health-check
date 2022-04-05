@@ -2,11 +2,11 @@
 | --- | :---: | :---: | :---: | :---: | :---: |
 @nativescript/animated-circle |  1.1.7 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/appavailability |  2.0.0 |  ✔ |  ✔ | ✔ |  ✔
-@nativescript/auto-fit-text |  1.0.2 |  ✔ |  ✔ | ✔ |  ✔
+@nativescript/auto-fit-text |  1.0.3 |  failed |  ✔ | failed |  ✔
 @nativescript/background-http |  6.0.0 |  failed |  failed | ✔ |  ✔
 @nativescript/brightness |  2.0.0 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/camera |  5.0.10 |  ✔ |  ✔ | ✔ |  ✔
-@nativescript/datetimepicker |  2.1.9 |  ✔ |  ✔ | ✔ |  ✔
+@nativescript/datetimepicker |  2.1.10 |  failed |  ✔ | failed |  ✔
 @nativescript/debug-ios |  1.0.0 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/directions |  2.0.1 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/email |  2.0.5 |  ✔ |  ✔ | ✔ |  ✔
@@ -14,7 +14,7 @@
 @nativescript/geolocation |  8.0.2 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/imagepicker |  1.0.6 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/iqkeyboardmanager |  2.0.0 |  ✔ |  ✔ | ✔ |  ✔
-@nativescript/local-notifications |  5.0.4 |  ✔ |  ✔ | ✔ |  ✔
+@nativescript/local-notifications |  6.0.0 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/localize |  5.0.4 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/picker |  4.0.1 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/shared-notification-delegate |  1.0.2 |  ✔ |  ✔ | ✔ |  ✔
