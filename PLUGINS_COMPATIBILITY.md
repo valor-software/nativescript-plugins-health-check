@@ -5,7 +5,7 @@
 @nativescript/auto-fit-text |  1.0.3 |  failed |  ✔ | failed |  ✔
 @nativescript/background-http |  6.0.0 |  failed |  failed | ✔ |  ✔
 @nativescript/brightness |  2.0.0 |  ✔ |  ✔ | ✔ |  ✔
-@nativescript/camera |  5.0.10 |  ✔ |  ✔ | ✔ |  ✔
+@nativescript/camera |  5.0.11 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/datetimepicker |  2.1.10 |  failed |  ✔ | failed |  ✔
 @nativescript/debug-ios |  1.0.0 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/directions |  2.0.1 |  ✔ |  ✔ | ✔ |  ✔
