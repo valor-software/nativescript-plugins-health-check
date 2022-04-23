@@ -19,4 +19,4 @@
 @nativescript/picker |  4.0.1 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/shared-notification-delegate |  1.0.2 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/social-share |  2.0.4 |  ✔ |  ✔ | ✔ |  ✔
-@nativescript/zip |  5.0.0 |  ✔ |  ✔ | ✔ |  ✔
+@nativescript/zip |  6.0.0 |  ✔ |  ✔ | ✔ |  ✔
