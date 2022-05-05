@@ -8,7 +8,7 @@
 @nativescript/camera |  5.0.12 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/datetimepicker |  2.1.10 |  failed |  ✔ | failed |  ✔
 @nativescript/debug-ios |  1.0.0 |  ✔ |  ✔ | ✔ |  ✔
-@nativescript/directions |  2.0.1 |  ✔ |  ✔ | ✔ |  ✔
+@nativescript/directions |  2.0.2 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/email |  2.0.5 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/fingerprint-auth |  8.1.0 |  ✔ |  ✔ | ✔ |  ✔
 @nativescript/geolocation |  8.0.2 |  ✔ |  ✔ | ✔ |  ✔
